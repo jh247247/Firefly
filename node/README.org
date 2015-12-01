@@ -17,3 +17,17 @@
    - Open Boards Manager from =Tools > Board= menu and install esp8266
      platform (and don't forget to select your ESP8266 board from
      =Tools > Board= menu after installation).
+** MQTT
+   This project uses the =MQTT= publish/subscribe protocol to send
+   messages between the nodes and the server (bigbro).
+
+   To install the library, you need to download the latest =PubSubClient=
+   as a zip from =https://github.com/knolleary/pubsubclient/releases=.
+
+   Then add it to the Arduino IDE by navigating to
+   =Sketch > Include Library > Add .ZIP Library= and selecting the
+   downloaded zip.      If there were an automated way to do this I would. But
+   there isn't. Get your game together Arduino. Sheesh.
+
+** NRF24L01
+   To be determined...
