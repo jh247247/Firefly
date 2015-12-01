@@ -4,7 +4,7 @@
    We are using the ESP8266 for the node processor, which can be
    programmed using the Arduino framework.
 
-   To set this up, you can follow the steps at the following websites:
+   To set this up, you can follow the steps at the following website:
    https://github.com/esp8266/Arduino
 
    Or just follow the following simple steps (paraphrased from above):
@@ -22,7 +22,7 @@
    messages between the nodes and the server (bigbro).
 
    To install the library, you need to download the latest =PubSubClient=
-   as a zip from =https://github.com/knolleary/pubsubclient/releases=.
+   as a zip from https://github.com/knolleary/pubsubclient/releases.
 
    Then add it to the Arduino IDE by navigating to
    =Sketch > Include Library > Add .ZIP Library= and selecting the
