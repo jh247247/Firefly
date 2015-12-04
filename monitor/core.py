@@ -2,12 +2,12 @@
 
 # this file sets up the api
 
-import node
+import node, firefly
+
 
 def api_setup(api):
     node.setup(api)
-
-    print('API SETUP DONE')
+    firefly.setup(api)
 
 if __name__ == '__main__':
     print("WRITE TEST")
