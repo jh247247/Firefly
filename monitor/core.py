@@ -5,7 +5,7 @@
 import node
 
 def api_setup(api):
-    api.add_resource(node.node_res,'/')
+    node.setup(api)
 
     print('API SETUP DONE')
 
