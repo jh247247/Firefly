@@ -25,6 +25,11 @@
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <SPI.h>
+#include <RF24.h>
+
+// nrf setup
+RF24 g_radio_nrf(18,15); // TODO: change depending on hardware config.
 
 // Update these with values suitable for your network.
 
@@ -44,6 +49,9 @@ void callback(char* topic, byte* payload, unsigned int length);
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   Serial.begin(115200);
+  g_radio_nrf.begin();
+  g_radio_nrf.printDetails();
+  
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -126,4 +134,5 @@ void loop() {
     Serial.println(msg);
     client.publish("outTopic", msg);
   }
+
 }
