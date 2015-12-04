@@ -1,13 +1,11 @@
 
 * Setup
-  I should have some bash script in here to set things up
-  automatically for you at some point.
+  The =setup.py= script in this folder does the following:
 
   Basic steps are:
   - Install python 3
   - Install mosquitto so that we can actually talk to the nodes
   - Install Flask for python using pip
-  - Make some sort of database that python can hook into
-  - Make this scripty stuff run on startup.
-  - ???
-  - Profit!
+  - Install mongoDB for a database, as well as python hooks
+  - TODO: Make some sort of database that python can hook into
+  - TODO: Make the application, broker and database run on startup.
