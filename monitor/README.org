@@ -1,0 +1,13 @@
+
+* Setup
+  I should have some bash script in here to set things up
+  automatically for you at some point.
+
+  Basic steps are:
+  - Install python 3
+  - Install mosquitto so that we can actually talk to the nodes
+  - Install Flask for python using pip
+  - Make some sort of database that python can hook into
+  - Make this scripty stuff run on startup.
+  - ???
+  - Profit!
