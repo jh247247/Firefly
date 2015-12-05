@@ -1,7 +1,13 @@
 #!/usr/bin/python3
 from pymongo import MongoClient
-from bson import json_util
+import json
 import paho.mqtt.client as mqtt
+
+DECODE_SCHEME = "utf-8"
+
+# might not be the best to keep these as magic strings, but idk
+nodes = MongoClient()['redo']['node']
+fireflies = MongoClient()['redo']['firefly']
 
 def on_connect(client, userdata, flags, rc):
     print("MQTT Connected with result: " + str(rc))
@@ -9,7 +15,16 @@ def on_connect(client, userdata, flags, rc):
     # TODO: subscribe to node channel
 
 def on_message(client, userdata, msg):
-    print("MQTT: received message: " + str(msg.topic)+":"+str(msg.payload))
+    print("MQTT: received message: " +
+          str(msg.topic)+":"+str(msg.payload, DECODE_SCHEME))
+    try:
+        data = json.loads(str(msg.payload, DECODE_SCHEME))
+        print("decoded: " + str(data))
+    except ValueError as e:
+        print("json decode error: " + str(e))
+
+
+
 
 client = mqtt.Client()
 client.on_connect = on_connect
