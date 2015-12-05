@@ -24,7 +24,7 @@ def on_message(client, userdata, msg):
         print("MQTT: json decode error: " + str(e))
 
     # woo! no errors, put into database
-    if data is not None:
+    if data is not None and data.get('nodeId') is not None:
         # might be a good idea for some authentication here.
         print("MQTT inserting decoded json into database")
         nodes.update_one({'nodeId':data.get('nodeId')},{'$setOnInsert':data},True)
