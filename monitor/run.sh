@@ -22,5 +22,5 @@ if pgrep monitor.py > /dev/null 2>&1; then
     echo "Monitor is already running!"
 else
     echo "Starting monitor..."
-    ./monitor.py &
+    ./main.py &
 fi
