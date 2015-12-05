@@ -58,3 +58,34 @@ android {
 allprojects {
   buildDir = "/tmp/${rootProject.name}/${project.name}"
 }
+
+// libraries go here!
+repositories {
+  mavenCentral()
+  jcenter()
+  maven { url "https://jitpack.io" }
+}
+
+dependencies {
+
+  // material dialogs
+  compile('com.github.afollestad.material-dialogs:core:0.8.5.1@aar') {
+    transitive = true
+  }
+
+  compile('com.github.afollestad.material-dialogs:commons:0.8.5.1@aar')
+  {
+    transitive = true
+  }
+
+  // Butterknife for view injection
+  compile 'com.jakewharton:butterknife:7.0.1'
+
+  // Support Libraries
+  compile 'com.android.support:appcompat-v7:23.0.0'
+  compile 'com.android.support:support-annotations:23.0.0'
+  compile 'com.android.support:support-v4:23.0.0'
+
+  compile 'com.squareup.retrofit:retrofit:1.6.0'
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+}
