@@ -11,7 +11,7 @@ sudo pip3 install PyMongo
 sudo pip3 install flask-restful
 
 # change permission of avahi folder so we can actually write to it
-sudo chmod 755 -R /etc/avahi/services/
-sudo cp mosquitto.service > /etc/avahi/services/mosquitto.service
-sudo cp *.service > /etc/avahi/services/*
+sudo chmod 777 -R /etc/avahi/services/
+sudo cp mosquitto.service /etc/avahi/services/mosquitto.service
+sudo cp rediscover.service /etc/avahi/services/rediscover.service
 sudo /etc/init.d/avahi-daemon restart
