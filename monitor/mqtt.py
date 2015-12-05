@@ -17,11 +17,17 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print("MQTT: received message: " +
           str(msg.topic)+":"+str(msg.payload, DECODE_SCHEME))
+    data = None
     try:
         data = json.loads(str(msg.payload, DECODE_SCHEME))
-        print("decoded: " + str(data))
     except ValueError as e:
-        print("json decode error: " + str(e))
+        print("MQTT: json decode error: " + str(e))
+
+    # woo! no errors, put into database
+    if data is not None:
+        # might be a good idea for some authentication here.
+        print("MQTT inserting decoded json into database")
+        nodes.update_one({'nodeId':data.get('nodeId')},{'$setOnInsert':data},True)
 
 
 

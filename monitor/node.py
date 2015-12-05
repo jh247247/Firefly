@@ -10,7 +10,7 @@ class node_res(fr.Resource):
     def get(self, node_id):
         # grab the data from the database, send it back out
         # maybe authenticate? idk
-        lookup = nodes.find_one({str(node_id) : {'$exists' : True}})
+        lookup = nodes.find_one({"nodeId":str(node_id)})
         if lookup is not None:
             return json_util.dumps(lookup)
         return 404
