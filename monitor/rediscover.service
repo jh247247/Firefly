@@ -1,0 +1,9 @@
+<!DOCTYPE service-group SYSTEM avahi-service.dtd>
+<service-group>
+ <name replace-wildcards=yes>(re)discover server on %h</name>
+  <service>
+   <type>_rediscover._tcp</type>
+   <port>5000</port>
+   <txt-record>info=REST API for (re)discover app</txt-record>
+  </service>
+</service-group>
