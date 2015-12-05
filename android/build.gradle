@@ -1,0 +1,60 @@
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.9'
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:1.5.0'
+  }
+}
+apply plugin: 'android'
+
+def gitSha = 'git rev-parse --short HEAD'.execute([],project.rootDir).text.trim()
+def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'",TimeZone.getTimeZone("UTC"))
+
+
+android {
+  compileSdkVersion 23
+  buildToolsVersion "23"
+
+  defaultConfig {
+    buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
+    buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+
+    minSdkVersion 11
+    targetSdkVersion 23
+    versionCode 1
+    versionName "1.0"
+  }
+
+  buildTypes {
+    release {
+      debuggable false
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+    }
+
+    debug {
+      debuggable true
+      applicationIdSuffix ".debug"
+      versionNameSuffix "-debug"
+    }
+  }
+
+  lintOptions {
+    disable 'InvalidPackage'
+    abortOnError false
+  }
+
+  dexOptions {
+    preDexLibraries = true
+  }
+
+}
+
+allprojects {
+  buildDir = "/tmp/${rootProject.name}/${project.name}"
+}
