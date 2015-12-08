@@ -31,3 +31,16 @@
 
 ** NRF24L01
    To be determined...
+
+* Hardware
+  The hardware for the node is rather simple, all it is is an =ESP-12=
+  module and an =NRF24L01= module.
+
+  To prototype this, connect it up as follows:
+  | ESP8266 GPIO name | ESP-12 pin number | Usage (on NRF24L01 module) |
+  | GPIO0             |                 4 | IRQ                        |
+  | GPIO12            |                14 | MISO                       |
+  | GPIO13            |                15 | MOSI                       |
+  | GPIO14            |                13 | SCK                        |
+  | GPIO15            |                15 | CS                         |
+  | GPIO16            |                12 | CE                         |
