@@ -49,8 +49,7 @@ const char* password = "";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-IPAddress monIp;
-const char* monServerName = "raspberrypi.local"; // avahi mdns name
+
 
 long lastMsg = 0;
 char msg[50];
@@ -67,7 +66,7 @@ void setup() {
   g_radio_nrf.printDetails();
 
   g_radio_nrf.setPayloadSize(sizeof(mac)); // we want to send the mac address so we can confirm.
-  g_radio_nrf.setPALevel(RF24_PA_LOW);
+  g_radio_nrf.setPALevel(RF24_PA_MIN);
   g_radio_nrf.setAutoAck(false);
 
   g_radio_nrf.openWritingPipe(address);
@@ -80,8 +79,8 @@ void setup() {
 
 
 
-  client.setServer(monIp, 1883);
-  client.setCallback(callback);
+  /* client.setServer(monIp, 1883); */
+  /* client.setCallback(callback); */
 }
 
 void setup_wifi() {
@@ -149,18 +148,6 @@ void reconnect() {
 
 
 void loop() {
-  WiFi.hostByName(monServerName, monIp);
-
-  Serial.print("Resolved monitor IP: ");
-  Serial.println(monIp);
-
-
-  WiFi.hostByName("google.com", monIp);
-
-  Serial.print("Resolved monitor IP: ");
-  Serial.println(monIp);
-
-
   bool timeout = false;
 
   g_radio_nrf.stopListening();
@@ -178,9 +165,10 @@ void loop() {
   delay(200);
   WAIT_FOR_PACKET(g_radio_nrf,500,timeout);
   if (g_radio_nrf.available()) {
-    Serial.println("Packet recieved!");
+    Serial.print("Packet recieved: -");
     g_radio_nrf.read(rx_packet, sizeof(rx_packet));
     PRINT_HEX(rx_packet,sizeof(rx_packet));
+    Serial.println();
   } else {
     Serial.println("No packet recieved!");
   }
