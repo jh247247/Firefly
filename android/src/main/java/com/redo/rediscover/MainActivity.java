@@ -16,6 +16,8 @@ public class MainActivity extends Activity {
     private NsdHelper m_nsdHelper;
     private ServiceCallback m_serviceCallback = new ServiceCallback();
 
+    private RetainedFragment m_retained;
+
     @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
 
     /** Called when the activity is first created. */
@@ -26,6 +28,9 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 	ButterKnife.bind(this);
 
+	setupRetainedFragment();
+
+	// setup network discovery.
 	m_nsdHelper = new NsdHelper(this,m_serviceCallback);
 	m_nsdHelper.startDiscovery();
     }
@@ -46,5 +51,22 @@ public class MainActivity extends Activity {
 	public void onServiceLost(NsdServiceInfo n) {
 	    Log.d(TAG, "Service lost: " + n);
 	}
+    }
+
+    private void setupRetainedFragment() {
+	// get back retained vars if required
+        m_retained = (RetainedFragment)
+            fm.findFragmentByTag(RetainedFragment.TAG);
+
+        // first start, fragment does not exist!
+        if(m_retained == null) {
+            Log.w("MainActivity","Have to create retained fragment!");
+            m_retained = new RetainFragment();
+            fm.beginTransaction().add(m_retained,
+                                      TAG_RETAIN_FRAGMENT).commit();
+        }
+
+	// TODO: get retained instances of our variables...
+	// TODO: send other retained instances along event bus.
     }
 }
