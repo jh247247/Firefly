@@ -1,4 +1,4 @@
-package com.redo.network.DiscoveryFragment;
+package com.redo.rediscover.network;
 
 import com.redo.rediscover.R;
 
