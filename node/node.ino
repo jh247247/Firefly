@@ -49,8 +49,6 @@ const char* password = "";
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-
-
 long lastMsg = 0;
 char msg[50];
 int value = 0;
@@ -152,13 +150,11 @@ void loop() {
 
   g_radio_nrf.stopListening();
 
-  Serial.print("Sending: ");
-  PRINT_HEX(mac,sizeof(mac));
-  Serial.println(" via NRF radio");
+
   if(!g_radio_nrf.write(mac,6,true)){
-    Serial.println("Packet write failed!");
-  } else {
-    Serial.println("Wrote packet!");
+    Serial.print("Sending ");
+    PRINT_HEX(mac,sizeof(mac));
+    Serial.println(" via NRF radio failed!");
   }
 
   g_radio_nrf.startListening();
@@ -168,7 +164,8 @@ void loop() {
     Serial.print("Packet recieved: -");
     g_radio_nrf.read(rx_packet, sizeof(rx_packet));
     PRINT_HEX(rx_packet,sizeof(rx_packet));
-    Serial.println();
+    Serial.print(" @ ");
+    Serial.println(millis());
   } else {
     Serial.println("No packet recieved!");
   }
