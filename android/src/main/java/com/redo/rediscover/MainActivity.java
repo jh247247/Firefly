@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 import android.widget.LinearLayout;
+import android.app.FragmentManager;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
@@ -54,6 +55,8 @@ public class MainActivity extends Activity {
     }
 
     private void setupRetainedFragment() {
+        FragmentManager fm = getFragmentManager();
+
 	// get back retained vars if required
         m_retained = (RetainedFragment)
             fm.findFragmentByTag(RetainedFragment.TAG);
@@ -61,9 +64,9 @@ public class MainActivity extends Activity {
         // first start, fragment does not exist!
         if(m_retained == null) {
             Log.w("MainActivity","Have to create retained fragment!");
-            m_retained = new RetainFragment();
+            m_retained = new RetainedFragment();
             fm.beginTransaction().add(m_retained,
-                                      TAG_RETAIN_FRAGMENT).commit();
+                                      RetainedFragment.TAG).commit();
         }
 
 	// TODO: get retained instances of our variables...
