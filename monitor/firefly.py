@@ -13,7 +13,7 @@ class firefly_res(fr.Resource):
         lookup = fireflies.find_one({str(firefly_id) : {'$exists' : True}})
         if lookup is not None:
             return json_util.dumps(lookup)
-        return 404
+        return 204
 
 
     def put(self, firefly_id):
