@@ -20,7 +20,7 @@ class node_res(fr.Resource):
         lookup = nodes.find_one({"nodeId" : str(node_id)})
         if lookup is not None:
             return json_util.dumps(lookup)
-        return 404
+        return 204
 
     def put(self, node_id):
         # insert node data into database. easy peasy.
