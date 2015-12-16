@@ -21,6 +21,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.AsyncTask;
 import android.content.Context;
+import android.os.Handler;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -48,6 +49,10 @@ public class MainActivity extends Activity {
     @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
     // remove later
 
+    // UI update handler
+    Handler m_uiHandler = new Handler();
+    private static int UI_UPDATE_TIMEOUT = 2000;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -61,6 +66,14 @@ public class MainActivity extends Activity {
         // setup network discovery.
         m_nsdHelper = new NsdHelper(this,m_serviceCallback);
         m_nsdHelper.startDiscovery();
+
+	m_uiHandler.postDelayed(new Runnable() {
+		@Override
+		public void run() {
+		    new DownloadWebpageTask().execute(m_monitorUrl+"/node");
+		    m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
+		}
+	    },UI_UPDATE_TIMEOUT);
     }
 
     @Override
@@ -77,11 +90,6 @@ public class MainActivity extends Activity {
             int port = n.getPort();
             m_monitorUrl = "http:/" + ip + ":" + port;
             Log.d(TAG, "Fully resolved URL: " + m_monitorUrl);
-
-            // FIXME: POF for http...
-            ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-            new DownloadWebpageTask().execute(m_monitorUrl+"/node");
         }
 
         @Override

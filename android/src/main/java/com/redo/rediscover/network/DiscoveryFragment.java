@@ -83,7 +83,6 @@ public class DiscoveryFragment extends Fragment {
 
     private void updateNodeData() {
         // TODO: load node data from api
-        m_nodeDataView.setText("Loading...");
 	Log.d(TAG, "Loading node ID: " + m_nodeIdStr);
 	new DownloadWebpageTask().execute(m_monitorUrlStr+"/node/"+m_nodeIdStr);
     }
