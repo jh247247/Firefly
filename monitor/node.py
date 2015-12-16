@@ -17,7 +17,7 @@ class node_res(fr.Resource):
     def get(self, node_id):
         # grab the data from the database, send it back out
         # maybe authenticate? idk
-        lookup = nodes.find_one({"nodeId" : str(node_id)})
+        lookup = nodes.find_one({"nodeId" : node_id})
         if lookup is not None:
             return json_util.dumps(lookup)
         return 204
@@ -54,7 +54,7 @@ This function sets up the API for Flask.
 """
 def setup(api):
     api.add_resource(nodelist_res,'/node')
-    api.add_resource(node_res,'/node/<int:node_id>')
+    api.add_resource(node_res,'/node/<string:node_id>')
 
 if __name__ == '__main__':
     print('WRITE TESTS FOR MEH')
