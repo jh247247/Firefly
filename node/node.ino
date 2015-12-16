@@ -45,11 +45,10 @@ byte rx_packet[6];
 const char* ssid = "linksys";
 const char* password = "";
 
-
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-long lastMsg = 0;
+IPAddress monIp = IPAddress(192,168,1,158); // TODO: make this IP
+                                            // findable by mdns
 char msg[50];
 int value = 0;
 
@@ -77,8 +76,8 @@ void setup() {
 
 
 
-  /* client.setServer(monIp, 1883); */
-  /* client.setCallback(callback); */
+  client.setServer(monIp, 1883);
+  client.setCallback(callback);
 }
 
 void setup_wifi() {
@@ -170,21 +169,14 @@ void loop() {
     Serial.println("No packet recieved!");
   }
 
-  //  if (!client.connected()) {
-  //    reconnect();
-  //  }
-  //  client.loop();
-  //
-  //  long now = millis();
-  //  if (now - lastMsg > 2000) {
-  //    lastMsg = now;
-  //    ++value;
-  //    snprintf (msg, 75, "hello world #%ld", value);
-  //    Serial.print("Publish message: ");
-  //    Serial.println(msg);
-  //    client.publish("outTopic", msg);
-  //  }
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
 
-
-
+  ++value;
+  snprintf (msg, 75, "{\"nodeId\":\"%X%X%X\",\"val\":%d}", mac[0],mac[1],mac[2],value);
+  Serial.print("Publish message: ");
+  Serial.println(msg);
+  client.publish("node", msg);
 }
