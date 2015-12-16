@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
     private RetainedFragment m_retained;
 
     private JSONObject m_nodesJson;
+    private String m_monitorUrl;
 
     @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
     @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
@@ -71,16 +72,14 @@ public class MainActivity extends Activity {
         public void onServiceResolved(NsdServiceInfo n) {
             Log.d(TAG, "Service resolved: " + n);
             InetAddress ip = n.getHost();
+            int port = n.getPort();
+            m_monitorUrl = "http:/" + ip + ":" + port;
+            Log.d(TAG, "Fully resolved URL: " + m_monitorUrl);
 
             // FIXME: POF for http...
-
-            int port = n.getPort();
-            String url = "http:/" + ip + ":" + port + "/node";
-            Log.d(TAG, "Fully resolved URL: " + url);
-
             ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
-            new DownloadWebpageTask().execute(url);
+            new DownloadWebpageTask().execute(m_monitorUrl+"/node");
         }
 
         @Override
@@ -101,6 +100,7 @@ public class MainActivity extends Activity {
                 return "Unable to retrieve web page. URL may be invalid.";
             }
         }
+
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
@@ -117,13 +117,13 @@ public class MainActivity extends Activity {
             } else {
                 m_mainText.setText("Invalid JSON returned: " + result);
             }
-	    JSONArray nodes = null;
+            JSONArray nodes = null;
             try {
                 nodes = m_nodesJson.getJSONArray("nodeIds");
             }
             catch(Exception e) {
                 Log.e(TAG,"Error while getting nodeIds array: " + e);
-		return;
+                return;
             }
 
             FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -131,8 +131,11 @@ public class MainActivity extends Activity {
 
                 Bundle b = new Bundle();
                 try {
-		    Log.d(TAG,"Read in node id: " + nodes.getString(i));
-		    b.putString(DiscoveryFragment.NODE_ID, nodes.getString(i));
+                    Log.d(TAG,"Read in node id: " + nodes.getString(i));
+                    b.putString(DiscoveryFragment.NODE_ID,
+                                nodes.getString(i));
+                    b.putString(DiscoveryFragment.MONITOR_URL,
+                                m_monitorUrl);
                 }
                 catch(Exception e) {
                     Log.e(TAG,"Error while getting node id value:  " + e);
