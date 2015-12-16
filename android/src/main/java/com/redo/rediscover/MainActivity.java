@@ -20,6 +20,8 @@ import android.app.FragmentManager;
 import android.os.AsyncTask;
 import android.content.Context;
 
+import org.json.JSONObject;
+
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
@@ -31,6 +33,8 @@ public class MainActivity extends Activity {
     private ServiceCallback m_serviceCallback = new ServiceCallback();
 
     private RetainedFragment m_retained;
+
+    private JSONObject m_nodesJson;
 
     @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
     @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
@@ -95,7 +99,19 @@ public class MainActivity extends Activity {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            m_mainText.setText(result);
+            m_nodesJson = null;
+            try {
+                m_nodesJson = new JSONObject(result);
+            }
+            catch (Exception e) {
+                Log.e(TAG,"Error on JSON parse: " + e);
+            }
+	    if(m_nodesJson != null) {
+		m_mainText.setText(m_nodesJson.toString());
+	    } else {
+		m_mainText.setText("Invalid JSON returned: " + result);
+	    }
+
         }
 
         // Given a URL, establishes an HttpUrlConnection and retrieves
