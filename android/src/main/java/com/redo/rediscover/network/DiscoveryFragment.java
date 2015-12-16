@@ -45,6 +45,10 @@ public class DiscoveryFragment extends Fragment {
     private String m_monitorUrlStr;
     private String m_nodeIdStr;
 
+    public DiscoveryFragment() {
+        EventBus.getDefault().register(this);
+    }
+
     // TODO: monitor url update?
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -64,11 +68,10 @@ public class DiscoveryFragment extends Fragment {
             m_nodeId.setText(m_nodeIdStr + " @ " + m_monitorUrlStr);
         }
 
-        updateNodeData();
-
         // TODO: actually make api...
+        updateNodeData(); // FIXME: loads twice due to event, not good
+        // but ok for now
 
-        EventBus.getDefault().register(this);
         return ret;
     }
 
@@ -92,6 +95,9 @@ public class DiscoveryFragment extends Fragment {
 
     // update the monitor, to be sent via the eventbus
     public static class MonitorUpdateEvent {
+	public MonitorUpdateEvent(String m) {
+	    monitorUrl = m;
+	}
         public String monitorUrl;
     }
 

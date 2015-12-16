@@ -28,6 +28,8 @@ import org.json.JSONArray;
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
+import de.greenrobot.event.EventBus;
+
 import com.redo.rediscover.network.DiscoveryFragment;
 
 public class MainActivity extends Activity {
@@ -127,7 +129,8 @@ public class MainActivity extends Activity {
             }
 	    Log.d(TAG,"Nodes list: " + nodes);
 
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+	    FragmentManager fm = getFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
             for (int i = 0; nodes != null && i < nodes.length(); i++) {
 		String nodeId = null;
                 Bundle b = new Bundle();
@@ -143,12 +146,17 @@ public class MainActivity extends Activity {
                     Log.e(TAG,"Error while getting node id value:  " + e);
                 }
 
+		if(fm.findFragmentByTag(nodeId) != null) {
+		    continue;
+		}
 
                 DiscoveryFragment f = new DiscoveryFragment();
                 f.setArguments(b);
                 ft.add(R.id.mainLayout, f, nodeId);
             }
             ft.commit();
+
+	    EventBus.getDefault().post(new DiscoveryFragment.MonitorUpdateEvent(m_monitorUrl));
         }
 
         // Given a URL, establishes an HttpUrlConnection and retrieves
