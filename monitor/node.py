@@ -17,9 +17,9 @@ class node_res(fr.Resource):
     def get(self, node_id):
         # grab the data from the database, send it back out
         # maybe authenticate? idk
-        lookup = nodes.find_one({"nodeId" : node_id})
+        lookup = nodes.find_one({"nodeId" : node_id},{'_id' : False})
         if lookup is not None:
-            return json_util.dumps(lookup)
+            return lookup
         return 204
 
     def put(self, node_id):
@@ -31,10 +31,9 @@ class node_res(fr.Resource):
         dat = {"data" : request.form}
         dat["nodeId"] = node_id
 
-        nodes.insert_one(dat)
+        nodes.insert_one(dict(dat))
 
-        # TODO: we may need to clean out the mongodb _id field from this...
-        return json.dumps(dat,default=json_util.default)
+        return dat
 
 """
 This class is the api call for HOSTNAME/node.
