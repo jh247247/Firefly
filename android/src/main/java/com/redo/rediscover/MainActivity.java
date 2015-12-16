@@ -16,14 +16,19 @@ import android.net.ConnectivityManager;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.AsyncTask;
 import android.content.Context;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
+
+import com.redo.rediscover.network.DiscoveryFragment;
 
 public class MainActivity extends Activity {
     private static String TAG = "MainActivity";
@@ -106,12 +111,39 @@ public class MainActivity extends Activity {
             catch (Exception e) {
                 Log.e(TAG,"Error on JSON parse: " + e);
             }
-	    if(m_nodesJson != null) {
-		m_mainText.setText(m_nodesJson.toString());
-	    } else {
-		m_mainText.setText("Invalid JSON returned: " + result);
-	    }
+            // debug for now...
+            if(m_nodesJson != null) {
+                m_mainText.setText(m_nodesJson.toString());
+            } else {
+                m_mainText.setText("Invalid JSON returned: " + result);
+            }
+	    JSONArray nodes = null;
+            try {
+                nodes = m_nodesJson.getJSONArray("nodeIds");
+            }
+            catch(Exception e) {
+                Log.e(TAG,"Error while getting nodeIds array: " + e);
+		return;
+            }
 
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            for (int i = 0; nodes != null && i < nodes.length(); i++) {
+
+                Bundle b = new Bundle();
+                try {
+		    Log.d(TAG,"Read in node id: " + nodes.getString(i));
+		    b.putString(DiscoveryFragment.NODE_ID, nodes.getString(i));
+                }
+                catch(Exception e) {
+                    Log.e(TAG,"Error while getting node id value:  " + e);
+                }
+
+
+                DiscoveryFragment f = new DiscoveryFragment();
+                f.setArguments(b);
+                ft.add(R.id.mainLayout, f);
+            }
+            ft.commit();
         }
 
         // Given a URL, establishes an HttpUrlConnection and retrieves

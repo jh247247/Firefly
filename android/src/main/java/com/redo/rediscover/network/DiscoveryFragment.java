@@ -3,11 +3,11 @@ package com.redo.rediscover.network;
 import com.redo.rediscover.R;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.View;
-import android.widget.ScrollView;
+import android.widget.TextView;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
@@ -19,15 +19,28 @@ import butterknife.Bind;
  */
 
 public class DiscoveryFragment extends Fragment {
-    @Bind(R.id.service_scroll_view) ScrollView m_serviceScrollView;
+    public static String NODE_ID = "nodeId";
+
+    @Bind(R.id.node_data) TextView m_nodeData;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
 			     ViewGroup container,
-			     Bundle onSavedInstaceState) {
+			     Bundle savedInstanceState) {
 	View ret =  inflater.inflate(R.layout.discovery,
 				container, false);
 	ButterKnife.bind(this,ret);
+
+	// parse passed in vars
+	Bundle args = getArguments();
+
+	if(args != null) {
+	    m_nodeData.setText(args.getString(NODE_ID));
+	}
+
+
+	// TODO: load node data from api
+	// TODO: actually make api...
 
 	// restore views here...
 
