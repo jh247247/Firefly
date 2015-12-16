@@ -125,15 +125,17 @@ public class MainActivity extends Activity {
                 Log.e(TAG,"Error while getting nodeIds array: " + e);
                 return;
             }
+	    Log.d(TAG,"Nodes list: " + nodes);
 
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             for (int i = 0; nodes != null && i < nodes.length(); i++) {
-
+		String nodeId = null;
                 Bundle b = new Bundle();
                 try {
-                    Log.d(TAG,"Read in node id: " + nodes.getString(i));
+		    nodeId = nodes.getString(i);
+                    Log.d(TAG,"Read in node id: " + nodeId);
                     b.putString(DiscoveryFragment.NODE_ID,
-                                nodes.getString(i));
+                                nodeId);
                     b.putString(DiscoveryFragment.MONITOR_URL,
                                 m_monitorUrl);
                 }
@@ -144,7 +146,7 @@ public class MainActivity extends Activity {
 
                 DiscoveryFragment f = new DiscoveryFragment();
                 f.setArguments(b);
-                ft.add(R.id.mainLayout, f);
+                ft.add(R.id.mainLayout, f, nodeId);
             }
             ft.commit();
         }
