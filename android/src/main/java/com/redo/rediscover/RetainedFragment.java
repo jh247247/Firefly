@@ -1,5 +1,6 @@
 package com.redo.rediscover;
 
+import java.net.InetAddress;
 import java.util.List;
 import java.io.IOException;
 
@@ -11,6 +12,7 @@ import android.net.nsd.NsdServiceInfo;
 
 import com.redo.rediscover.network.RediscoverService;
 import com.redo.rediscover.network.Node;
+import com.redo.rediscover.network.NodeList;
 
 import retrofit.Retrofit;
 import retrofit.GsonConverterFactory;
@@ -44,30 +46,20 @@ public class RetainedFragment extends Fragment {
     public void setServiceInfo(NsdServiceInfo n) {
         m_serviceInfo = n;
 
+        InetAddress ip = n.getHost();
+        int port = n.getPort();
+        String url = "http:/" + ip + ":" + port;
+        Log.d(TAG, "Fully resolved URL: " + url);
+
         Retrofit r = new Retrofit.Builder()
-            .baseUrl("https://api.github.com")
-	    .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create())
             .build();
-	RediscoverService m_rediscoverService =
+        m_rediscoverService =
             r.create(RediscoverService.class);
-	Call<List<Node>> call =
-            m_rediscoverService.contributions("square","retrofit");
-	List<Node> nodes = null;
-	try {
-	    nodes = call.execute().body();
-	}
-	catch(Exception e) {
-	    Log.e(TAG,"Error getting json: " + e);
-	    return;
-	}
-	if(nodes == null) {
-	    Log.e(TAG,"No contributions!");
-	    return;
-	}
-	for(Node no : nodes) {
-	    Log.d(TAG,"Test api: " + no.login + " (" +
-            no.contributions + ")");
-	}
     }
 
+    public RediscoverService getServiceApi() {
+	return m_rediscoverService;
+    }
 }

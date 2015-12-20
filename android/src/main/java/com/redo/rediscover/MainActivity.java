@@ -80,12 +80,6 @@ public class MainActivity extends Activity {
 	    m_nsdHelper.stopDiscovery(); // tell the helper to stop
 	    // listening, we already found the service.
 	    m_retained.setServiceInfo(n);
-
-            Log.d(TAG, "Service resolved: " + n);
-            InetAddress ip = n.getHost();
-            int port = n.getPort();
-            m_monitorUrl = "http:/" + ip + ":" + port;
-            Log.d(TAG, "Fully resolved URL: " + m_monitorUrl);
         }
 
         @Override
