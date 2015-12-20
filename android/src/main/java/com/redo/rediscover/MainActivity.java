@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
 
     // UI update handler
     Handler m_uiHandler = new Handler();
-    private static int UI_UPDATE_TIMEOUT = 2000;
+    private static int UI_UPDATE_TIMEOUT = 200;
 
     /** Called when the activity is first created. */
     @Override
@@ -66,14 +66,6 @@ public class MainActivity extends Activity {
         // setup network discovery.
         m_nsdHelper = new NsdHelper(this,m_serviceCallback);
         m_nsdHelper.startDiscovery();
-
-	m_uiHandler.postDelayed(new Runnable() {
-		@Override
-		public void run() {
-		    new DownloadWebpageTask().execute(m_monitorUrl+"/node");
-		    m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
-		}
-	    },UI_UPDATE_TIMEOUT);
     }
 
     @Override
@@ -85,6 +77,10 @@ public class MainActivity extends Activity {
     class ServiceCallback implements NsdHelper.NsdHelperListener {
         @Override
         public void onServiceResolved(NsdServiceInfo n) {
+	    m_nsdHelper.stopDiscovery(); // tell the helper to stop
+	    // listening, we already found the service.
+	    m_retained.setServiceInfo(n);
+
             Log.d(TAG, "Service resolved: " + n);
             InetAddress ip = n.getHost();
             int port = n.getPort();
@@ -95,120 +91,6 @@ public class MainActivity extends Activity {
         @Override
         public void onServiceLost(NsdServiceInfo n) {
             Log.d(TAG, "Service lost: " + n);
-        }
-    }
-
-    // FIXME: Have this as a nice api or something later on.
-    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... urls) {
-
-            // params comes from the execute() call: params[0] is the url.
-            try {
-                return downloadUrl(urls[0]);
-            } catch (IOException e) {
-                return "Unable to retrieve web page. URL may be invalid.";
-            }
-        }
-
-        // onPostExecute displays the results of the AsyncTask.
-        @Override
-        protected void onPostExecute(String result) {
-            m_nodesJson = null;
-            try {
-                m_nodesJson = new JSONObject(result);
-            }
-            catch (Exception e) {
-                Log.e(TAG,"Error on JSON parse: " + e);
-            }
-            // debug for now...
-            if(m_nodesJson != null) {
-                m_mainText.setText(m_nodesJson.toString());
-            } else {
-                m_mainText.setText("Invalid JSON returned: " + result);
-            }
-            JSONArray nodes = null;
-            try {
-                nodes = m_nodesJson.getJSONArray("nodeIds");
-            }
-            catch(Exception e) {
-                Log.e(TAG,"Error while getting nodeIds array: " + e);
-                return;
-            }
-	    Log.d(TAG,"Nodes list: " + nodes);
-
-	    FragmentManager fm = getFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-            for (int i = 0; nodes != null && i < nodes.length(); i++) {
-		String nodeId = null;
-                Bundle b = new Bundle();
-                try {
-		    nodeId = nodes.getString(i);
-                    Log.d(TAG,"Read in node id: " + nodeId);
-                    b.putString(DiscoveryFragment.NODE_ID,
-                                nodeId);
-                    b.putString(DiscoveryFragment.MONITOR_URL,
-                                m_monitorUrl);
-                }
-                catch(Exception e) {
-                    Log.e(TAG,"Error while getting node id value:  " + e);
-                }
-
-		if(fm.findFragmentByTag(nodeId) != null) {
-		    continue;
-		}
-
-                DiscoveryFragment f = new DiscoveryFragment();
-                f.setArguments(b);
-                ft.add(R.id.mainLayout, f, nodeId);
-            }
-            ft.commit();
-
-	    EventBus.getDefault().post(new DiscoveryFragment.MonitorUpdateEvent(m_monitorUrl));
-        }
-
-        // Given a URL, establishes an HttpUrlConnection and retrieves
-        // the web page content as a InputStream, which it returns as
-        // a string.
-        private String downloadUrl(String myurl) throws IOException {
-            InputStream is = null;
-            // Only display the first 500 characters of the retrieved
-            // web page content.
-            int len = 500;
-
-            try {
-                URL url = new URL(myurl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                // Starts the query
-                conn.connect();
-                int response = conn.getResponseCode();
-                Log.d(TAG, "The response is: " + response);
-                is = conn.getInputStream();
-
-                // Convert the InputStream into a string
-                String contentAsString = readIt(is, len);
-                return contentAsString;
-
-                // Makes sure that the InputStream is closed after the app is
-                // finished using it.
-            } finally {
-                if (is != null) {
-                    is.close();
-                }
-            }
-        }
-
-        // Reads an InputStream and converts it to a String.
-        public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-            Reader reader = null;
-            reader = new InputStreamReader(stream, "UTF-8");
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
         }
     }
 
