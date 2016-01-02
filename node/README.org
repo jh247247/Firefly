@@ -37,10 +37,10 @@
   module and an =NRF24L01= module.
 
   To prototype this, connect it up as follows:
-  | ESP8266 GPIO name | ESP-12 pin number | Usage (on NRF24L01 module) |
-  | GPIO0             |                 4 | IRQ                        |
-  | GPIO12            |                14 | MISO                       |
-  | GPIO13            |                15 | MOSI                       |
-  | GPIO14            |                13 | SCK                        |
-  | GPIO15            |                15 | CS                         |
-  | GPIO16            |                12 | CE                         |
+  | ESP8266 GPIO name | ESP-12 pin | NodeMCU DevKit v1 pin | Usage (on NRF24L01 module) |
+  | GPIO0             |          4 |                    D3 | IRQ                        |
+  | GPIO12            |         14 |                    D6 | MISO                       |
+  | GPIO13            |         15 |                    D7 | MOSI                       |
+  | GPIO14            |         13 |                    D5 | SCK                        |
+  | GPIO15            |         15 |                    D8 | CS                         |
+  | GPIO16            |         12 |                    D0 | CE                         |
