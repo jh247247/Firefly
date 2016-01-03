@@ -1,3 +1,8 @@
-*~
-/node/#node.ino#
-/node/.#node.ino
+android/tmp/
+android/build/
+android/.idea/
+android/.gradle/
+android/captures/
+android/gradle/
+android/local.properties
+android/android.iml

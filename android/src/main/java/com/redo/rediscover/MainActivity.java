@@ -16,12 +16,22 @@ import android.net.ConnectivityManager;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.AsyncTask;
 import android.content.Context;
+import android.os.Handler;
+
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
+
+import de.greenrobot.event.EventBus;
+
+import com.redo.rediscover.network.DiscoveryFragment;
 
 public class MainActivity extends Activity {
     private static String TAG = "MainActivity";
@@ -32,9 +42,16 @@ public class MainActivity extends Activity {
 
     private RetainedFragment m_retained;
 
+    private JSONObject m_nodesJson;
+    private String m_monitorUrl;
+
     @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
     @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
     // remove later
+
+    // UI update handler
+    Handler m_uiHandler = new Handler();
+    private static int UI_UPDATE_TIMEOUT = 200;
 
     /** Called when the activity is first created. */
     @Override
@@ -60,86 +77,14 @@ public class MainActivity extends Activity {
     class ServiceCallback implements NsdHelper.NsdHelperListener {
         @Override
         public void onServiceResolved(NsdServiceInfo n) {
-            Log.d(TAG, "Service resolved: " + n);
-            InetAddress ip = n.getHost();
-
-            // FIXME: POF for http...
-
-            int port = n.getPort();
-            String url = "http:/" + ip + ":" + port + "/node";
-            Log.d(TAG, "Fully resolved URL: " + url);
-
-            ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-            new DownloadWebpageTask().execute(url);
+	    m_nsdHelper.stopDiscovery(); // tell the helper to stop
+	    // listening, we already found the service.
+	    m_retained.setServiceInfo(n);
         }
 
         @Override
         public void onServiceLost(NsdServiceInfo n) {
             Log.d(TAG, "Service lost: " + n);
-        }
-    }
-
-    // FIXME: Have this as a nice api or something later on.
-    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... urls) {
-
-            // params comes from the execute() call: params[0] is the url.
-            try {
-                return downloadUrl(urls[0]);
-            } catch (IOException e) {
-                return "Unable to retrieve web page. URL may be invalid.";
-            }
-        }
-        // onPostExecute displays the results of the AsyncTask.
-        @Override
-        protected void onPostExecute(String result) {
-            m_mainText.setText(result);
-        }
-
-        // Given a URL, establishes an HttpUrlConnection and retrieves
-        // the web page content as a InputStream, which it returns as
-        // a string.
-        private String downloadUrl(String myurl) throws IOException {
-            InputStream is = null;
-            // Only display the first 500 characters of the retrieved
-            // web page content.
-            int len = 500;
-
-            try {
-                URL url = new URL(myurl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
-                conn.setRequestMethod("GET");
-                conn.setDoInput(true);
-                // Starts the query
-                conn.connect();
-                int response = conn.getResponseCode();
-                Log.d(TAG, "The response is: " + response);
-                is = conn.getInputStream();
-
-                // Convert the InputStream into a string
-                String contentAsString = readIt(is, len);
-                return contentAsString;
-
-                // Makes sure that the InputStream is closed after the app is
-                // finished using it.
-            } finally {
-                if (is != null) {
-                    is.close();
-                }
-            }
-        }
-
-        // Reads an InputStream and converts it to a String.
-        public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-            Reader reader = null;
-            reader = new InputStreamReader(stream, "UTF-8");
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
         }
     }
 
