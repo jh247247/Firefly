@@ -32,6 +32,13 @@ import butterknife.Bind;
 import de.greenrobot.event.EventBus;
 
 import com.redo.rediscover.network.DiscoveryFragment;
+import retrofit.Call;
+import com.redo.rediscover.network.NodeList;
+import com.redo.rediscover.network.RediscoverService;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
+import java.util.List;
 
 public class MainActivity extends Activity {
     private static String TAG = "MainActivity";
@@ -77,9 +84,10 @@ public class MainActivity extends Activity {
     class ServiceCallback implements NsdHelper.NsdHelperListener {
         @Override
         public void onServiceResolved(NsdServiceInfo n) {
-	    m_nsdHelper.stopDiscovery(); // tell the helper to stop
-	    // listening, we already found the service.
-	    m_retained.setServiceInfo(n);
+            m_nsdHelper.stopDiscovery(); // tell the helper to stop
+            // listening, we already found the service.
+            m_retained.setServiceInfo(n);
+            setupNodeAttrList();
         }
 
         @Override
@@ -105,5 +113,39 @@ public class MainActivity extends Activity {
 
         // TODO: get retained instances of our variables...
         // TODO: send other retained instances along event bus.
+    }
+
+    private void setupNodeAttrList() {
+        // get node attrs from retained fragment
+        RediscoverService service = m_retained.getServiceApi();
+        Call<NodeList> call = service.nodeIds();
+        call.enqueue(new Callback<NodeList>() {
+                @Override
+                public void onResponse(Response<NodeList> resp, Retrofit retro) {
+                    List<String> nl = resp.body().nodeIds;
+
+                    // set the main text to show all known node IDS
+                    m_mainText.setText(nl.toString());
+
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+
+                    // Make a fragment that monitors that node id
+                    for(String id : nl) {
+                        Bundle b = new Bundle();
+                        b.putString(DiscoveryFragment.NODE_ID,id);
+
+                        DiscoveryFragment f = new DiscoveryFragment();
+                        f.setArguments(b);
+                        ft.add(R.id.mainLayout, f, id);
+                    }
+		    ft.commit();
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    m_mainText.setText("Failure!");
+                }
+            });
     }
 }
