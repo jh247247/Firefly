@@ -12,7 +12,7 @@ class firefly_res(fr.Resource):
     def get(self, firefly_id):
         # grab the data from the database, send it back out
         # maybe authenticate? idk
-        lookup = fireflies.find_one({"fireflyId" : firefly_id, {'_id' : False}})
+        lookup = fireflies.find_one({"fireflyId" : firefly_id}, {'_id' : False})
         if lookup is not None:
             return lookup
         return 204
