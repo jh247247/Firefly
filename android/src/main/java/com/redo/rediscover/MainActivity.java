@@ -39,6 +39,7 @@ import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
 import java.util.List;
+import com.redo.rediscover.network.Node;
 
 public class MainActivity extends Activity {
     private static String TAG = "MainActivity";
@@ -58,27 +59,38 @@ public class MainActivity extends Activity {
 
     // UI update handler
     Handler m_uiHandler = new Handler();
-    private static int UI_UPDATE_TIMEOUT = 200;
+    private static int UI_UPDATE_TIMEOUT = 1000;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         setContentView(R.layout.main);
         ButterKnife.bind(this);
-
         setupRetainedFragment();
+        if(m_retained.getServiceApi() == null){
+            // setup network discovery.
+            m_nsdHelper = new NsdHelper(this,m_serviceCallback);
+            m_nsdHelper.startDiscovery();
+        }
 
-        // setup network discovery.
-        m_nsdHelper = new NsdHelper(this,m_serviceCallback);
-        m_nsdHelper.startDiscovery();
+	// update the list every UI_UPDATE_TIMEOUT ms, ugly pls fix
+        m_uiHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+		    setupNodeAttrList();
+                    m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
+                }
+            },UI_UPDATE_TIMEOUT);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         ButterKnife.unbind(this);
+        EventBus.getDefault().unregister(this);
     }
 
     class ServiceCallback implements NsdHelper.NsdHelperListener {
@@ -113,11 +125,14 @@ public class MainActivity extends Activity {
 
         // TODO: get retained instances of our variables...
         // TODO: send other retained instances along event bus.
+
     }
 
     private void setupNodeAttrList() {
         // get node attrs from retained fragment
         RediscoverService service = m_retained.getServiceApi();
+        if(service == null) return;
+
         Call<NodeList> call = service.nodeIds();
         call.enqueue(new Callback<NodeList>() {
                 @Override
@@ -133,18 +148,51 @@ public class MainActivity extends Activity {
                     // Make a fragment that monitors that node id
                     for(String id : nl) {
                         Bundle b = new Bundle();
-                        b.putString(DiscoveryFragment.NODE_ID,id);
+                        b.putString(DiscoveryFragment.NODE_ID, id);
 
-                        DiscoveryFragment f = new DiscoveryFragment();
-                        f.setArguments(b);
-                        ft.add(R.id.mainLayout, f, id);
+                        // make sure we don't already have the fragment inflated
+                        DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(id);
+                        if(df != null) {
+                            // fragment already exists, try to update contents
+                            df.requestUpdate();
+                        } else {
+                            // make a new fragment...
+                            DiscoveryFragment f = new DiscoveryFragment();
+                            f.setArguments(b);
+                            ft.add(R.id.mainLayout, f, id);
+                        }
+
+                        // TODO: handle if node dissapears...
                     }
-		    ft.commit();
+                    ft.commit();
                 }
 
                 @Override
                 public void onFailure(Throwable t) {
                     m_mainText.setText("Failure!");
+                }
+            });
+    }
+
+    // update a node that sends it's id along the eventbus with the proper encapsulation.
+    public void onEvent(final DiscoveryFragment.RequestNodeIdUpdateEvent e) {
+        RediscoverService s = m_retained.getServiceApi();
+        Call<Node> call = s.nodeDetails(e.id);
+        call.enqueue(new Callback<Node>() {
+                @Override
+                public void onResponse(Response<Node> resp,
+                                       Retrofit retro) {
+                    Node n = resp.body();
+                    FragmentManager fm = getFragmentManager();
+                    DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(n.nodeId);
+                    if(df != null) {
+                        df.updateNode(n);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    Log.e(TAG,"Error updating node: " + e.id +" :"+t.toString());
                 }
             });
     }

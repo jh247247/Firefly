@@ -27,6 +27,7 @@ import de.greenrobot.event.EventBus;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
+import com.redo.rediscover.network.Node;
 
 /**
  * This class handles the UI for network discovery, allowing the user
@@ -42,10 +43,6 @@ public class DiscoveryFragment extends Fragment {
     @Bind(R.id.node_data) TextView m_nodeDataView;
 
     private String m_nodeIdStr;
-
-    public DiscoveryFragment() {
-        EventBus.getDefault().register(this);
-    }
 
     // TODO: monitor url update?
     @Override
@@ -65,13 +62,9 @@ public class DiscoveryFragment extends Fragment {
             m_nodeId.setText("Node ID: " + m_nodeIdStr);
         }
 
-        return ret;
-    }
+	requestUpdate();
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
+        return ret;
     }
 
     // event bus stuff!
@@ -85,5 +78,20 @@ public class DiscoveryFragment extends Fragment {
 	    monitorUrl = m;
 	}
         public String monitorUrl;
+    }
+
+    public static class RequestNodeIdUpdateEvent {
+	public RequestNodeIdUpdateEvent(String str) {
+	    id = str;
+	}
+	public String id;
+    }
+
+    public void requestUpdate() {
+	EventBus.getDefault().post(new RequestNodeIdUpdateEvent(m_nodeIdStr));
+    }
+
+    public void updateNode(Node n) {
+	m_nodeDataView.setText("Val: " + n.val);
     }
 }
