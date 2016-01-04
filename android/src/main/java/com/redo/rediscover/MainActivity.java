@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
 
     // UI update handler
     Handler m_uiHandler = new Handler();
-    private static int UI_UPDATE_TIMEOUT = 1000;
+    private static int UI_UPDATE_TIMEOUT = 5000;
 
     /** Called when the activity is first created. */
     @Override
@@ -76,11 +76,23 @@ public class MainActivity extends Activity {
             m_nsdHelper.startDiscovery();
         }
 
-	// update the list every UI_UPDATE_TIMEOUT ms, ugly pls fix
+    }
+
+    @Override
+    public void onPause() {
+	super.onPause();
+        m_uiHandler.removeCallbacksAndMessages(null);
+    }
+
+
+    @Override
+    public void onResume() {
+	super.onResume();
+        // update the list every UI_UPDATE_TIMEOUT ms, ugly pls fix
         m_uiHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-		    setupNodeAttrList();
+                    setupNodeAttrList();
                     m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
                 }
             },UI_UPDATE_TIMEOUT);
