@@ -69,6 +69,7 @@ IPAddress ESPmDNS::getIpFromHostname(const char * hostname)
   while (!packetLength) {
     packetLength = udp.parsePacket();
   }
+  
 
   if (packetLength > MIN_MDNS_PACKET_LENGTH) {
     // Read in packet
@@ -82,11 +83,12 @@ IPAddress ESPmDNS::getIpFromHostname(const char * hostname)
       if (memcmp(recvPacketBuffer+12,requestPacketBuffer+12,length) == 0) { // Hostname matches
         // Get IP from bytes
         int ipStartPoint = packetLength-4;
+        udp.stop();
         return IPAddress(recvPacketBuffer[ipStartPoint], recvPacketBuffer[ipStartPoint+1], recvPacketBuffer[ipStartPoint+2], recvPacketBuffer[ipStartPoint+3]);
       }
     }
   }
-
+  udp.stop();
   return INADDR_NONE;
 }
 

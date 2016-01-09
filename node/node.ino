@@ -49,9 +49,9 @@ byte mac[6];
 byte rx_packet[6];
 
 // Update these with values suitable for your network.
-const char* ssid = "linksys";
-const char* password = "0000000000";
-
+const char* ssid = "Home&Hosed";
+const char* password = "143c91ffbf323f9b07439610a4";
+ 
 // Networking globals
 WiFiClient espClient;
 PubSubClient client(espClient);
