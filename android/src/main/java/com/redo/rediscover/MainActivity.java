@@ -96,6 +96,7 @@ public class MainActivity extends Activity {
                     m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
                 }
             },UI_UPDATE_TIMEOUT);
+	setupNodeAttrList();
     }
 
     @Override

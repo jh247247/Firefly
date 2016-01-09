@@ -12,7 +12,7 @@ class ESPmDNS
 {
   public:
     ESPmDNS(void);
-    IPAddress getIpFromHostname(const char * hostname, int length);
+    IPAddress getIpFromHostname(const char * hostname);
     
   private:
     WiFiUDP udp;

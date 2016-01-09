@@ -11,15 +11,19 @@ ESPmDNS::ESPmDNS() {
  *  - https://en.wikipedia.org/wiki/Multicast_DNS
  *  - https://tools.ietf.org/html/rfc6762
 */
-IPAddress ESPmDNS::getIpFromHostname(const char * hostname, int length)
+
+#ifndef PRINT_HEX
+#define PRINT_HEX(h,l) {int d_i; Serial.print(h[l-1],HEX);for(d_i = l-2; d_i >= 0; d_i--){Serial.print(":");Serial.print(h[d_i],HEX);}}
+#endif
+IPAddress ESPmDNS::getIpFromHostname(const char * hostname)
 {
   udp.beginMulticast(WiFi.localIP(), mDnsAddress, MDNS_PORT);
-
+  int length = strlen(hostname);
   // ### SEND REQUEST ###
   
   // Create Request Packet
-  int mdnsPacketSize = 29;
-  byte requestPacketBuffer[mdnsPacketSize];
+  int mdnsPacketSize = 24+length;
+  byte requestPacketBuffer[mdnsPacketSize]; // malloc would be cleaner I guess, but this is safer for now.
   memset(requestPacketBuffer, 0, mdnsPacketSize);
 
   // Header
@@ -38,10 +42,7 @@ IPAddress ESPmDNS::getIpFromHostname(const char * hostname, int length)
 
   // Hostname data
   requestPacketBuffer[12] = length;
-  int i;
-  for (i = 0; i < length; i++) {
-    requestPacketBuffer[13+i] = hostname[i];
-  }
+  memcpy(requestPacketBuffer+13,hostname,length);
 
   // Footer
   requestPacketBuffer[13+length] = 0x05; // Length
@@ -66,7 +67,6 @@ IPAddress ESPmDNS::getIpFromHostname(const char * hostname, int length)
   
   int packetLength = 0;
   while (!packetLength) {
-    delay(500);
     packetLength = udp.parsePacket();
   }
 
@@ -79,23 +79,14 @@ IPAddress ESPmDNS::getIpFromHostname(const char * hostname, int length)
     if (recvPacketBuffer[7] > 0) {
       
       // Check if ans has correct hostname
-      int match = 1;
-      int j;
-      for (j = 12; j < 12+length; j++) {
-        if (recvPacketBuffer[j] != requestPacketBuffer[j]) {
-          match = 0;
-          break;
-        }
-      }
-      if (match) { // Hostname matches
-        
+      if (memcmp(recvPacketBuffer+12,requestPacketBuffer+12,length) == 0) { // Hostname matches
         // Get IP from bytes
-        int ipStartPoint = 12+length+1+17;
+        int ipStartPoint = packetLength-4;
         return IPAddress(recvPacketBuffer[ipStartPoint], recvPacketBuffer[ipStartPoint+1], recvPacketBuffer[ipStartPoint+2], recvPacketBuffer[ipStartPoint+3]);
       }
     }
   }
 
-  return -1; // 255.255.255.255
+  return INADDR_NONE;
 }
 

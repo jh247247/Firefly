@@ -38,6 +38,7 @@
 
 // Prototypes
 void setup_wifi();
+void setup_host();
 void callback(char* topic, byte* payload, unsigned int length);
 
 
@@ -55,7 +56,7 @@ const char* password = "0000000000";
 WiFiClient espClient;
 PubSubClient client(espClient);
 ESPmDNS espmDNS;
-IPAddress monIp;
+IPAddress monIp = INADDR_NONE;
 
 // MQTT globals
 char msg[50];
@@ -82,11 +83,7 @@ void setup() {
   WiFi.macAddress(mac);
   setup_wifi();
 
-  Serial.println("Discovering Monitor IP...");
-  monIp = espmDNS.getIpFromHostname("raspi", 5);
-
-  Serial.print("Monitor IP: ");
-  Serial.println(monIp);
+  setup_host();
 
   client.setServer(monIp, 1883);
   client.setCallback(callback);
@@ -113,6 +110,18 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+void setup_host() {
+  Serial.println("Discovering Monitor IP...");
+  monIp = INADDR_NONE;
+  while(monIp == INADDR_NONE) {
+    monIp = espmDNS.getIpFromHostname("raspberrypi");
+  }
+  
+
+  Serial.print("Monitor IP: ");
+  Serial.println(monIp);
+}
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -134,6 +143,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnect() {
+  setup_host();
+  
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -160,7 +171,6 @@ void loop() {
   bool timeout = false;
 
   g_radio_nrf.stopListening();
-
 
   if(!g_radio_nrf.write(mac,6,true)){
     Serial.print("Sending ");
