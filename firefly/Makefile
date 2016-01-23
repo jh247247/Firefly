@@ -67,9 +67,9 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	$(OBJDUMP) -St $(PROJ_NAME).elf >$(PROJ_NAME).lst
 	$(SIZE) $(PROJ_NAME).elf
-	
+
 program: $(PROJ_NAME).bin
-	openocd -f $(OPENOCD_BOARD_DIR)/stm32f0discovery.cfg -f $(OPENOCD_PROC_FILE) -c "stm_flash `pwd`/$(PROJ_NAME).bin" -c shutdown
+	stm32flash -i dtr,-rts,-dtr:dtr,rts,-dtr /dev/ttyUSB0 -b 115200 -w main.bin -R
 
 clean:
 	find ./ -name '*~' | xargs rm -f	
