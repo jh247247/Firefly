@@ -30,7 +30,7 @@ OBJCOPY=arm-none-eabi-objcopy
 OBJDUMP=arm-none-eabi-objdump
 SIZE=arm-none-eabi-size
 
-CFLAGS  = -Wall -g -std=c99 -Os  
+CFLAGS  = -Wall -g -std=c99 -Os -flto
 #CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m0 -march=armv6s-m/usr/local/share/openocd/scripts/board
 CFLAGS += -mlittle-endian -mcpu=cortex-m0  -march=armv6-m -mthumb
 CFLAGS += -ffunction-sections -fdata-sections
@@ -79,7 +79,7 @@ $(PROJ_NAME).elf: $(SRCS)
 size:
 	$(SIZE) $(PROJ_NAME).elf
 
-program: proj
+program: all
 	stm32flash -i dtr,-rts,-dtr:dtr,rts,-dtr /dev/ttyUSB0 -b 115200 -w $(PROJ_NAME).bin -R
 
 clean:

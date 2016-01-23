@@ -13,12 +13,6 @@
 #define F_CPU                           (SystemCoreClock)                       //cpu frequency
 #define NOP()                           __NOP()                                         //remap nop()
 
-//port operations
-#define PIN_SET(port, pins)     port->ODR |= (pins)                     //set pins on port
-#define PIN_CLR(port, pins)     port->ODR &=~(pins)                     //clear pins on port
-#define PIN_FLP(port, pins)     port->ODR ^= (pins)                     //flip pins on port
-#define PIN_GET(port, pins) (port->IDR & (pins))                //read pins on port
-
 //software delays
 #define DLY_MS                          5 //50 cycles = 1ms @ 1Mhz - estimated. calibrate for your chip / compiler setting
 #define delay_ms(ms)            delay((ms) * DLY_MS * ((F_CPU) / 1000000ul))//delay for milli-seconds
@@ -40,11 +34,11 @@ int main(void) {
 
   chip_init();
   JIO_setOut(LED_PORT, .GPIO_Pin = LED_A);
-  PIN_SET(LED_PORT, LED_A);
+  JIO_SET(LED_PORT, LED_A);
   JIO_setOut(LED_PORT, .GPIO_Pin = LED_C);
-  PIN_CLR(LED_PORT, LED_C);
+  JIO_CLR(LED_PORT, LED_C);
   while(1) {
-    PIN_FLP(LED_PORT, LED_A | LED_C);
+    JIO_FLP(LED_PORT, LED_A | LED_C);
     delay_ms(del++);
     if(del == 500) {
       del = 1;
