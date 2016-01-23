@@ -48,6 +48,7 @@ CFLAGS += -I inc -I $(STD_PERIPH_LIB) -I $(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32
 CFLAGS += -I $(JIO_LIB)
 CFLAGS += -I $(STD_PERIPH_LIB)/CMSIS/Include -I $(STD_PERIPH_LIB)/STM32F0xx_StdPeriph_Driver/inc
 CFLAGS += -include $(STD_PERIPH_LIB)/stm32f0xx_conf.h
+CFLAGS +=
 
 SRCS += Device/startup_stm32f0xx.s # add startup file to build
 
@@ -61,7 +62,7 @@ OBJS = $(SRCS:.c=.o)
 
 .PHONY: lib proj
 
-all: lib proj
+all: lib proj size
 
 lib:
 	$(MAKE) -C $(STD_PERIPH_LIB)
@@ -74,6 +75,8 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	$(OBJDUMP) -St $(PROJ_NAME).elf >$(PROJ_NAME).lst
+
+size:
 	$(SIZE) $(PROJ_NAME).elf
 
 program: proj
