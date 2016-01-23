@@ -5,7 +5,7 @@ SRCS = main.c system_stm32f0xx.c
 PROJ_NAME=main
 
 # Location of the Libraries folder from the STM32F0xx Standard Peripheral Library
-STD_PERIPH_LIB=Libraries
+STD_PERIPH_LIB=lib/StdPeriph
 
 # Location of the linker scripts
 LDSCRIPT_INC=Device/ldscripts
