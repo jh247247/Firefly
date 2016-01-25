@@ -1,5 +1,5 @@
 # put your *.o targets here, make should handle the rest!
-SRCS = main.c system_stm32f0xx.c
+SRCS = main.c system_stm32f0xx.c led.c
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 PROJ_NAME=main
@@ -39,6 +39,7 @@ CFLAGS += -Wl,--gc-sections -Wl,-Map=$(PROJ_NAME).map
 ###################################################
 
 vpath %.c src
+vpath %.c src/drv
 vpath %.a $(STD_PERIPH_LIB)
 vpath %.a $(JIO_LIB)
 
@@ -75,6 +76,7 @@ $(PROJ_NAME).elf: $(SRCS)
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 	$(OBJDUMP) -St $(PROJ_NAME).elf >$(PROJ_NAME).lst
+	$(OBJDUMP) -h -d --section=.text $(PROJ_NAME).elf > $(PROJ_NAME).dump
 
 size:
 	$(SIZE) $(PROJ_NAME).elf

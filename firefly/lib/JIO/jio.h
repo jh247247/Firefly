@@ -47,9 +47,11 @@ void JIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef GPIO_InitStruct);
                                            })
 
 // use BSRR and BRR to avoid read-modify-write later on.
-#define JIO_SET(port,pins) port->BSRR = (pins);
-#define JIO_CLR(port,pins) port->BRR = (pins);
-#define JIO_FLP(port,pins) port->ODR ^= (pins);
+#define JIO_SET(port,pins) port->BSRR = (pins)
+#define JIO_CLR(port,pins) port->BRR = (pins)
+#define JIO_FLP(port,pins) port->ODR ^= (pins)
 #define JIO_GET(port,pins) (port->IDR & pins)
+/* TODO:  This macro probably needs optimization*/
+#define JIO_WRITE(port,bits,mask) (port->ODR = (port->ODR & mask)|bits)
 
 #endif /* JIO_H */
