@@ -3,6 +3,7 @@
 #include "stm32f0xx_gpio.h"
 #include <jio.h>
 #include <led.h>
+#include <uid.h>
 
 //software delays - not to be used for precision delays
 void delay(uint32_t dly) {
