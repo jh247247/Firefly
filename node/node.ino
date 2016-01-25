@@ -49,8 +49,9 @@ byte mac[6];
 byte rx_packet[6];
 
 // Update these with values suitable for your network.
-const char* ssid = "Home&Hosed";
-const char* password = "143c91ffbf323f9b07439610a4";
+const char* ssid = "linksys";
+const char* password = "0000000000";
+const char* monitorHostname = "raspi";
  
 // Networking globals
 WiFiClient espClient;
@@ -114,7 +115,7 @@ void setup_host() {
   Serial.println("Discovering Monitor IP...");
   monIp = INADDR_NONE;
   while(monIp == INADDR_NONE) {
-    monIp = espmDNS.getIpFromHostname("raspberrypi");
+    monIp = espmDNS.getIpFromHostname(monitorHostname);
   }
   
 
