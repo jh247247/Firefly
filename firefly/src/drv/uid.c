@@ -1,6 +1,8 @@
 #include <uid.h>
-#define UUID ((uint32_t*)0x40015800)
+
+// UNDOCUMENTED FEATURE ON STM32F030, unique ID bits reside at this address.
+#define UUID ((uint32_t*)0x1FFFF7A4)
 
 uint32_t UID_get() {
-  return UUID[0]^UUID[1]^UUID[2];
+  return UUID[1];
 }

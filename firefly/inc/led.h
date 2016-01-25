@@ -1,5 +1,6 @@
 #ifndef LED_H
 #define LED_H
+#include <jio.h>
 
 typedef enum {RED = 0, GREEN, BLUE, ALL, NONE} LedColor;
 
@@ -15,8 +16,14 @@ typedef enum {RED = 0, GREEN, BLUE, ALL, NONE} LedColor;
 #define LED_RED_PIN (1<<LED_RED_OFFSET)
 #define LED_BLUE_PIN (1<<LED_BLUE_OFFSET)
 
+#define LED_ALL_PINS LED_RED_PIN | LED_GREEN_PIN | LED_BLUE_PIN
+
 #define LED_ON(c) JIO_SET(LED_PORT,LED_##c##_PIN)
 #define LED_OFF(c) JIO_CLR(LED_PORT,LED_##c##_PIN)
+
+#define LED_ALL_ON JIO_SET(LED_PORT, LED_ALL_PINS)
+#define LED_ALL_OFF JIO_CLR(LED_PORT, LED_ALL_PINS)
+#define LED_ALL_TOGGLE JIO_FLP(LED_PORT, LED_ALL_PINS)
 
 typedef struct {
   LedColor color;

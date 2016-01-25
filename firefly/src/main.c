@@ -5,10 +5,6 @@
 #include <led.h>
 #include <uid.h>
 
-//software delays - not to be used for precision delays
-void delay(uint32_t dly) {
-  while (dly-- != 0) __NOP();
-}
 
 //reset chip
 void chip_init(void) {
@@ -23,11 +19,6 @@ int main(void) {
   unsigned char col = 0;
   chip_init();
   while(1) {
-    if(cyc++ == del) {
-      LED_SetColor(.color = ALL, .brightness = col++);
-      cyc = 0;
-    }
-
-    LED_Update();
+    UID_flash();
   }
 }
