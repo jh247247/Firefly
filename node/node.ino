@@ -32,6 +32,9 @@
 #include <RF24.h>
 #include "ESPmDNS.h"
 
+#define FAKE_FF_ID 1234
+#define FAKE_FF_BATTERY 7
+
 // magics.
 #define PRINT_HEX(h,l) {int d_i; Serial.print(h[l-1],HEX);for(d_i = l-2; d_i >= 0; d_i--){Serial.print(":");Serial.print(h[d_i],HEX);}}
 #define WAIT_FOR_PACKET(r,t,to) {int d_start = micros(); while(!r.available()){if(micros() - d_start > t*1000){to=true;break;}}}
@@ -40,6 +43,7 @@
 void setup_wifi();
 void setup_host();
 void callback(char* topic, byte* payload, unsigned int length);
+void recvFakePacket();
 
 
 // nrf globals
@@ -183,13 +187,19 @@ void loop() {
   delay(200);
   WAIT_FOR_PACKET(g_radio_nrf,500,timeout);
   if (g_radio_nrf.available()) {
-    Serial.print("Packet recieved: -");
+    Serial.print("Packet received: -");
     g_radio_nrf.read(rx_packet, sizeof(rx_packet));
     PRINT_HEX(rx_packet,sizeof(rx_packet));
     Serial.print(" @ ");
     Serial.println(millis());
   } else {
-    Serial.println("No packet recieved!");
+    
+    if (value % 5 == 0) {
+      Serial.println("Fake packet received!");
+      recvFakePacket();
+    } else {
+      Serial.println("No packet received!");
+    }
   }
 
   if (!client.connected()) {
@@ -199,10 +209,17 @@ void loop() {
 
   ++value;
   snprintf (msg, 75, "{\"nodeId\":\"%X%X%X\",\"val\":%d}", mac[0],mac[1],mac[2],value);
-  Serial.print("Publish message: ");
+  Serial.print("Publish message with node data: ");
   Serial.println(msg);
   client.publish("node", msg);
 
   delay(500);
+}
+
+void recvFakePacket() {
+  snprintf (msg, 75, "{\"fireflyId\":\"%d\",\"bat\":%d}", FAKE_FF_ID, FAKE_FF_BATTERY);
+  Serial.print("Publish message with firefly data: ");
+  Serial.println(msg);
+  client.publish("firefly", msg);
 }
 
