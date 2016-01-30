@@ -8,3 +8,5 @@ android/local.properties
 android/android.iml
 monitor/__pycache__/
 *~
+*.o
+*.a
