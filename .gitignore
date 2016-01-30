@@ -6,4 +6,5 @@ android/captures/
 android/gradle/
 android/local.properties
 android/android.iml
+monitor/__pycache__/
 *~

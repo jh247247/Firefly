@@ -24,3 +24,5 @@ else
     echo "Starting monitor..."
     ./main.py &
 fi
+
+read -p ""

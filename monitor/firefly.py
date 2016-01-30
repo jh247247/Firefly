@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from pymongo import MongoClient
+import json
 from bson import json_util
 from flask import request
 import flask_restful as fr
@@ -26,7 +27,13 @@ class firefly_res(fr.Resource):
 
         return dat
 
+class fireflylist_res(fr.Resource):
+    def get(self):
+        return {'fireflyIds':fireflys.distinct('fireflyId')}
+
+
 def setup(api):
+    api.add_resource(fireflylist_res,'/firefly')
     api.add_resource(firefly_res,'/firefly/<string:firefly_id>')
 
 if __name__ == '__main__':

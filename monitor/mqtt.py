@@ -14,6 +14,7 @@ fireflies = MongoClient()['redo']['firefly']
 def on_connect(client, userdata, flags, rc):
     print("MQTT Connected with result: " + str(rc))
     client.subscribe("node")
+    client.subscribe("firefly")
 
 def on_message(client, userdata, msg):
     print("MQTT: received message: " +
@@ -24,14 +25,17 @@ def on_message(client, userdata, msg):
     except ValueError as e:
         print("MQTT: json decode error: " + str(e))
 
-    # TODO: Update firefly list?
+    # Put into db depending on topic
+    # TODO: Add authentication before db insertian
+    if str(msg.topic) == "node":
+        if data is not None and data.get('nodeId') is not None:
+            print("MQTT: inserting decoded json into node database: " + str(data))
+            nodes.update_one({'nodeId':data.get('nodeId')},{'$set':data},upsert=True)
 
-    # woo! no errors, put into database
-    if data is not None and data.get('nodeId') is not None:
-        # might be a good idea for some authentication here.
-        print("MQTT: inserting decoded json into database: " + str(data))
-        nodes.update_one({'nodeId':data.get('nodeId')},{'$set':data},upsert=True)
-
+    elif str(msg.topic) == "firefly":
+        if data is not None and data.get('fireflyId') is not None:
+            print("MQTT: inserting decoded json into firefly database: " + str(data))
+            fireflies.update_one({'fireflyId':data.get('fireflyId')},{'$set':data},upsert=True)
 
 
 
