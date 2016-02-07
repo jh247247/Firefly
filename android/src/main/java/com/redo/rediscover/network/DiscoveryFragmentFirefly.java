@@ -75,7 +75,7 @@ public class DiscoveryFragmentFirefly extends Fragment {
         EventBus.getDefault().post(new RequestFireflyIdUpdateEvent(m_fireflyIdStr));
     }
 
-    public void updateFirefly(Firefly n) {
-        m_fireflyDataView.setText("Val: " + n.val);
+    public void updateFirefly(Firefly f) {
+        m_fireflyDataView.setText("Battery: " + f.bat);
     }
 }

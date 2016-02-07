@@ -1,33 +1,16 @@
 package com.redo.rediscover.network;
 
 import com.redo.rediscover.R;
-
-import java.net.InetAddress;
-import java.io.IOException;
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Reader;
-import java.io.InputStreamReader;
-
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.View;
 import android.widget.TextView;
-import android.os.AsyncTask;
-import android.util.Log;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
-
 import de.greenrobot.event.EventBus;
-
-import org.json.JSONObject;
-import org.json.JSONArray;
-import com.redo.rediscover.network.Node;
 
 /**
  * This class handles the UI for network discovery, allowing the user

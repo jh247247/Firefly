@@ -1,8 +1,5 @@
 package com.redo.rediscover.network;
 
-import java.util.List;
-
-import retrofit.Retrofit;
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Path;

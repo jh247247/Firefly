@@ -3,15 +3,11 @@ package com.redo.rediscover;
 import android.app.Activity;
 import android.os.Bundle;
 import android.net.nsd.NsdServiceInfo;
-import android.net.ConnectivityManager;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.os.AsyncTask;
-import android.content.Context;
 import android.os.Handler;
 import java.util.List;
 
@@ -146,9 +142,6 @@ public class MainActivity extends Activity {
                 public void onResponse(Response<NodeList> resp, Retrofit retro) {
                     List<String> nodeList = resp.body().nodeIds;
 
-                    // set the main text to show all known node IDS
-                    m_mainText.setText(nodeList.toString());
-
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction ft = fm.beginTransaction();
 
@@ -185,9 +178,6 @@ public class MainActivity extends Activity {
             @Override
             public void onResponse(Response<FireflyList> resp, Retrofit retro) {
                 List<String> fireflyList = resp.body().fireflyIds;
-
-                // set the main text to show all known node IDS
-                m_mainText.setText(fireflyList.toString());
 
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
