@@ -12,4 +12,8 @@ public interface RediscoverService {
     Call<Node> nodeDetails(@Path("nodeId") String nodeId);
     @GET("/node")
     Call<NodeList> nodeIds();
+    @GET("/firefly/{fireflyId}")
+    Call<Firefly> fireflyDetails(@Path("fireflyId") String fireflyId);
+    @GET("/firefly")
+    Call<FireflyList> fireflyIds();
 }

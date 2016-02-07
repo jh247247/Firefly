@@ -3,7 +3,7 @@ package com.redo.rediscover;
 /**
  * This class should find our servers that advertise via
  * zeroconf/avahi/bonjour/whatever.
- * Refer to https://developer.android.com/reference/android/net/nsd/NsdManager.html for more information.
+ * Refer to https://developer.android.com/reference/android/net/nsd/NsdManager.html  for more information.
  * (C) Jack Hosemans 2015
  */
 
