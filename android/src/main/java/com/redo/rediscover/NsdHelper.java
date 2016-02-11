@@ -3,11 +3,10 @@ package com.redo.rediscover;
 /**
  * This class should find our servers that advertise via
  * zeroconf/avahi/bonjour/whatever.
- * Refer to https://developer.android.com/reference/android/net/nsd/NsdManager.html for more information.
+ * Refer to https://developer.android.com/reference/android/net/nsd/NsdManager.html  for more information.
  * (C) Jack Hosemans 2015
  */
 
-import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 
 import android.net.nsd.NsdManager;
@@ -28,25 +27,25 @@ public class NsdHelper {
     private WeakReference<NsdHelperListener> m_helperListener;
 
     public NsdHelper(Context ctx, NsdHelperListener l) {
-	// note that we NEVER want to keep a strong reference to the context, otherwise we can get a memory leak and
-	// that will just make jack sad.
-	m_nsdManager = (NsdManager) ctx.getSystemService(Context.NSD_SERVICE);
-	m_helperListener = new WeakReference<NsdHelperListener>(l);
+        // note that we NEVER want to keep a strong reference to the context, otherwise we can get a memory leak and
+        // that will just make jack sad.
+        m_nsdManager = (NsdManager) ctx.getSystemService(Context.NSD_SERVICE);
+        m_helperListener = new WeakReference<NsdHelperListener>(l);
     }
 
     public void startDiscovery() {
-	m_nsdManager.discoverServices(SERVICE_NAME,
-				      NsdManager.PROTOCOL_DNS_SD,
-				      m_discoveryListener);
+        m_nsdManager.discoverServices(SERVICE_NAME,
+                NsdManager.PROTOCOL_DNS_SD,
+                m_discoveryListener);
     }
 
     public void stopDiscovery() {
-	try {
-	    m_nsdManager.stopServiceDiscovery(m_discoveryListener);
-	}
-	finally {
-	    // idk lol
-	}
+        try {
+            m_nsdManager.stopServiceDiscovery(m_discoveryListener);
+        }
+        finally {
+            // idk lol
+        }
     }
 
     /**
@@ -56,13 +55,13 @@ public class NsdHelper {
      *     NsdServiceInfo, so rely on the name for comparison.
      */
     interface NsdHelperListener {
-	public void onServiceResolved(NsdServiceInfo n);
-	public void onServiceLost(NsdServiceInfo n);
+        public void onServiceResolved(NsdServiceInfo n);
+        public void onServiceLost(NsdServiceInfo n);
     }
 
     // just in case of context switches, we can reset the listener.
     public void setListener(NsdHelperListener l) {
-	m_helperListener = new WeakReference<NsdHelperListener>(l);
+        m_helperListener = new WeakReference<NsdHelperListener>(l);
     }
 
     /**
@@ -71,40 +70,40 @@ public class NsdHelper {
     class NsdDiscovery implements NsdManager.DiscoveryListener {
         @Override
         public void onDiscoveryStarted(String regType) {
-	    Log.d(TAG,"Service discovery started!");
+            Log.d(TAG,"Service discovery started!");
         }
 
         @Override
         public void onServiceFound(NsdServiceInfo service) {
-	    Log.d(TAG,"Service found: " + service);
-	    m_nsdManager.resolveService(service, m_resolveListener);
+            Log.d(TAG,"Service found: " + service);
+            m_nsdManager.resolveService(service, m_resolveListener);
         }
 
         @Override
         public void onServiceLost(NsdServiceInfo service) {
-	    Log.d(TAG,"Service lost " + service);
+            Log.d(TAG,"Service lost " + service);
 
-	    NsdHelperListener l = m_helperListener.get();
-	    if(l != null) {
-		l.onServiceLost(service);
-	    }
+            NsdHelperListener l = m_helperListener.get();
+            if(l != null) {
+                l.onServiceLost(service);
+            }
         }
 
         @Override
         public void onDiscoveryStopped(String serviceType) {
-	    Log.d(TAG,"Service discovery stopped!");
+            Log.d(TAG,"Service discovery stopped!");
         }
 
         @Override
         public void onStartDiscoveryFailed(String serviceType,
                                            int errorCode) {
-	    Log.d(TAG,"Start discovery failed. Error code" + errorCode);
+            Log.d(TAG,"Start discovery failed. Error code" + errorCode);
         }
 
         @Override
         public void onStopDiscoveryFailed(String serviceType,
                                           int errorCode) {
-	    Log.d(TAG,"Stop discovery failed. Error code" + errorCode);
+            Log.d(TAG,"Stop discovery failed. Error code" + errorCode);
         }
     }
 
@@ -113,20 +112,20 @@ public class NsdHelper {
      *
      */
     class NsdResolve implements NsdManager.ResolveListener {
-	@Override
-	public void onResolveFailed(NsdServiceInfo serviceInfo,
-				    int errorCode) {
-	    Log.d(TAG,"Resolve failed. Error code" + errorCode);
-	}
+        @Override
+        public void onResolveFailed(NsdServiceInfo serviceInfo,
+                                    int errorCode) {
+            Log.d(TAG,"Resolve failed. Error code" + errorCode);
+        }
 
-	@Override
-	public void onServiceResolved(NsdServiceInfo serviceInfo) {
-	    Log.d(TAG,"Resolve succeeded: " + serviceInfo);
-	    NsdHelperListener l = m_helperListener.get();
-	    if(l != null) {
-		l.onServiceResolved(serviceInfo);
-	    }
-	}
+        @Override
+        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+            Log.d(TAG,"Resolve succeeded: " + serviceInfo);
+            NsdHelperListener l = m_helperListener.get();
+            if(l != null) {
+                l.onServiceResolved(serviceInfo);
+            }
+        }
     }
 
 }

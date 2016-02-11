@@ -1,23 +1,16 @@
 package com.redo.rediscover;
 
 import java.net.InetAddress;
-import java.util.List;
-import java.io.IOException;
 
 import android.app.Fragment;
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.net.nsd.NsdServiceInfo;
 
 import com.redo.rediscover.network.RediscoverService;
-import com.redo.rediscover.network.Node;
-import com.redo.rediscover.network.NodeList;
 
 import retrofit.Retrofit;
 import retrofit.GsonConverterFactory;
-import retrofit.Call;
-
 
 
 /**
@@ -52,14 +45,14 @@ public class RetainedFragment extends Fragment {
         Log.d(TAG, "Fully resolved URL: " + url);
 
         Retrofit r = new Retrofit.Builder()
-            .baseUrl(url)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
         m_rediscoverService =
-            r.create(RediscoverService.class);
+                r.create(RediscoverService.class);
     }
 
     public RediscoverService getServiceApi() {
-	return m_rediscoverService;
+        return m_rediscoverService;
     }
 }

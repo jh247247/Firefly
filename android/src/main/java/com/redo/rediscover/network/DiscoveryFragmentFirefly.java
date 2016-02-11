@@ -1,15 +1,16 @@
 package com.redo.rediscover.network;
 
-import com.redo.rediscover.R;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
-import butterknife.ButterKnife;
+import com.redo.rediscover.R;
+
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -18,14 +19,14 @@ import de.greenrobot.event.EventBus;
  * current session (or subsequent sessions if it is saved)
  */
 
-public class DiscoveryFragment extends Fragment {
-    public static String NODE_ID = "nodeId";
-    private static String TAG = "DiscoveryFragment";
+public class DiscoveryFragmentFirefly extends Fragment {
+    public static String FIREFLY_ID = "nodeId";
+    private static String TAG = "DiscoveryFragmentFirefly";
 
-    @Bind(R.id.node_id) TextView m_nodeId;
-    @Bind(R.id.node_data) TextView m_nodeDataView;
+    @Bind(R.id.firefly_id) TextView m_fireflyId;
+    @Bind(R.id.firefly_data) TextView m_fireflyDataView;
 
-    private String m_nodeIdStr;
+    private String m_fireflyIdStr;
 
     // TODO: monitor url update?
     @Override
@@ -33,7 +34,7 @@ public class DiscoveryFragment extends Fragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View ret =  inflater.inflate(R.layout.discovery,
+        View ret =  inflater.inflate(R.layout.discovery_firefly,
                                      container, false);
         ButterKnife.bind(this,ret);
 
@@ -41,8 +42,8 @@ public class DiscoveryFragment extends Fragment {
         Bundle args = getArguments();
 
         if(args != null) {
-            m_nodeIdStr = args.getString(NODE_ID);
-            m_nodeId.setText("Node ID: " + m_nodeIdStr);
+            m_fireflyIdStr = args.getString(FIREFLY_ID);
+            m_fireflyId.setText("Firefly ID: " + m_fireflyIdStr);
         }
 
         requestUpdate();
@@ -63,18 +64,18 @@ public class DiscoveryFragment extends Fragment {
         public String monitorUrl;
     }
 
-    public static class RequestNodeIdUpdateEvent {
-        public RequestNodeIdUpdateEvent(String str) {
+    public static class RequestFireflyIdUpdateEvent {
+        public RequestFireflyIdUpdateEvent(String str) {
             id = str;
         }
         public String id;
     }
 
     public void requestUpdate() {
-        EventBus.getDefault().post(new RequestNodeIdUpdateEvent(m_nodeIdStr));
+        EventBus.getDefault().post(new RequestFireflyIdUpdateEvent(m_fireflyIdStr));
     }
 
-    public void updateNode(Node n) {
-        m_nodeDataView.setText("Val: " + n.val);
+    public void updateFirefly(Firefly f) {
+        m_fireflyDataView.setText("Battery: " + f.bat);
     }
 }

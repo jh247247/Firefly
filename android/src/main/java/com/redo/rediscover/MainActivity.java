@@ -1,45 +1,35 @@
 package com.redo.rediscover;
 
-import java.net.InetAddress;
-import java.io.IOException;
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Reader;
-import java.io.InputStreamReader;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.net.nsd.NsdServiceInfo;
-import android.net.ConnectivityManager;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.os.AsyncTask;
-import android.content.Context;
 import android.os.Handler;
+import java.util.List;
 
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 import butterknife.ButterKnife;
 import butterknife.Bind;
 
 import de.greenrobot.event.EventBus;
 
-import com.redo.rediscover.network.DiscoveryFragment;
 import retrofit.Call;
-import com.redo.rediscover.network.NodeList;
-import com.redo.rediscover.network.RediscoverService;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
-import java.util.List;
+
+import com.redo.rediscover.network.DiscoveryFragment;
+import com.redo.rediscover.network.DiscoveryFragmentFirefly;
+import com.redo.rediscover.network.RediscoverService;
 import com.redo.rediscover.network.Node;
+import com.redo.rediscover.network.NodeList;
+import com.redo.rediscover.network.Firefly;
+import com.redo.rediscover.network.FireflyList;
 
 public class MainActivity extends Activity {
     private static String TAG = "MainActivity";
@@ -150,16 +140,13 @@ public class MainActivity extends Activity {
         call.enqueue(new Callback<NodeList>() {
                 @Override
                 public void onResponse(Response<NodeList> resp, Retrofit retro) {
-                    List<String> nl = resp.body().nodeIds;
-
-                    // set the main text to show all known node IDS
-                    m_mainText.setText(nl.toString());
+                    List<String> nodeList = resp.body().nodeIds;
 
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction ft = fm.beginTransaction();
 
                     // Make a fragment that monitors that node id
-                    for(String id : nl) {
+                    for(String id : nodeList) {
                         Bundle b = new Bundle();
                         b.putString(DiscoveryFragment.NODE_ID, id);
 
@@ -185,6 +172,43 @@ public class MainActivity extends Activity {
                     m_mainText.setText("Failure!");
                 }
             });
+
+        Call<FireflyList> callFirefly = service.fireflyIds();
+        callFirefly.enqueue(new Callback<FireflyList>() {
+            @Override
+            public void onResponse(Response<FireflyList> resp, Retrofit retro) {
+                List<String> fireflyList = resp.body().fireflyIds;
+
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+
+                // Make a fragment that monitors that node id
+                for(String id : fireflyList) {
+                    Bundle b = new Bundle();
+                    b.putString(DiscoveryFragment.NODE_ID, id);
+
+                    // make sure we don't already have the fragment inflated
+                    DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(id);
+                    if(df != null) {
+                        // fragment already exists, try to update contents
+                        df.requestUpdate();
+                    } else {
+                        // make a new fragment...
+                        DiscoveryFragmentFirefly f = new DiscoveryFragmentFirefly();
+                        f.setArguments(b);
+                        ft.add(R.id.mainLayout, f, id);
+                    }
+
+                    // TODO: handle if node dissapears...
+                }
+                ft.commit();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                m_mainText.setText("Failure!");
+            }
+        });
     }
 
     // update a node that sends it's id along the eventbus with the proper encapsulation.
@@ -205,8 +229,30 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    Log.e(TAG,"Error updating node: " + e.id +" :"+t.toString());
+                    Log.e(TAG, "Error updating node: " + e.id + " :" + t.toString());
                 }
             });
+    }
+
+    public void onEvent(final DiscoveryFragmentFirefly.RequestFireflyIdUpdateEvent e) {
+        RediscoverService s = m_retained.getServiceApi();
+        Call<Firefly> call = s.fireflyDetails(e.id);
+        call.enqueue(new Callback<Firefly>() {
+            @Override
+            public void onResponse(Response<Firefly> resp,
+                                   Retrofit retro) {
+                Firefly f = resp.body();
+                FragmentManager fm = getFragmentManager();
+                DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(f.fireflyId);
+                if(df != null) {
+                    df.updateFirefly(f);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e(TAG,"Error updating Firefly: " + e.id + " :" + t.toString());
+            }
+        });
     }
 }
