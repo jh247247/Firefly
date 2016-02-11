@@ -1,16 +1,20 @@
 #include<serial.h>
+#include<jio.h>
+
+const char* SERIAL_ERRMSG = "E/";
+const char* SERIAL_WRNMSG = "W/";
+const char* SERIAL_VRBMSG = "V/";
+const char* SERIAL_DEBMSG = "D/";
 
 void SERIAL_init(int baud) {
-  GPIO_InitTypeDef GPIO_InitStructure;
+ GPIO_InitTypeDef GPIO_InitStructure;
 
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  JIO_setMode(GPIOA,
+	      .GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10,
+	      .GPIO_Mode = GPIO_Mode_AF,
+	      .GPIO_PuPd = GPIO_PuPd_NOPULL);
 
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_1); // USART1 TX
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_1);
@@ -39,7 +43,7 @@ unsigned int SERIAL_getDelimited(char* buf, char delimiter) {
   return len;
 }
 
-void SERIAL_putString(char* str) {
+void SERIAL_putString(const char* str) {
   while(*str) {
     SERIAL_put(*str++);
   }

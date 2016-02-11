@@ -17,15 +17,15 @@ void JIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef GPIO_InitStruct);
  *  \param port Port to set
  *  \param .GPIO_Pin Pins to set to given settings
  */
-#define JIO_setMode(port,...) JIO_Init(port,                           \
-                                        (GPIO_InitTypeDef){             \
-                                          .GPIO_Pin = 0,                \
-                                            .GPIO_Mode = GPIO_Mode_IN,  \
-                                            .GPIO_OType = GPIO_OType_PP, \
-                                            .GPIO_Speed = GPIO_Speed_2MHz, \
-                                            .GPIO_PuPd = GPIO_PuPd_DOWN, \
-                                            __VA_ARGS__                 \
-                                            })
+#define JIO_setMode(port,...) JIO_Init(port,                            \
+                                       (GPIO_InitTypeDef){              \
+                                         .GPIO_Pin = 0,                 \
+                                           .GPIO_Mode = GPIO_Mode_IN,   \
+                                           .GPIO_OType = GPIO_OType_PP, \
+                                           .GPIO_Speed = GPIO_Speed_2MHz, \
+                                           .GPIO_PuPd = GPIO_PuPd_DOWN, \
+                                           __VA_ARGS__                  \
+                                           })
 
 /**
  *  \brief Named parameter wrapper around GPIO_Init, sets pins to output by default
@@ -36,15 +36,15 @@ void JIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef GPIO_InitStruct);
  *  \param .GPIO_Pin Pins to set to given settings
  */
 
-#define JIO_setOut(port,...) JIO_Init(port,                            \
-                                       (GPIO_InitTypeDef){              \
-                                         .GPIO_Pin = 0,                 \
-                                           .GPIO_Mode = GPIO_Mode_OUT,  \
-                                           .GPIO_OType = GPIO_OType_PP, \
-                                           .GPIO_Speed = GPIO_Speed_50MHz, \
-                                           .GPIO_PuPd = GPIO_PuPd_NOPULL, \
-					   __VA_ARGS__			\
-                                           })
+#define JIO_setOut(port,...) JIO_Init(port,                             \
+                                      (GPIO_InitTypeDef){               \
+                                        .GPIO_Pin = 0,                  \
+                                          .GPIO_Mode = GPIO_Mode_OUT,   \
+                                          .GPIO_OType = GPIO_OType_PP,  \
+                                          .GPIO_Speed = GPIO_Speed_50MHz, \
+                                          .GPIO_PuPd = GPIO_PuPd_NOPULL, \
+                                          __VA_ARGS__                   \
+                                          })
 
 // use BSRR and BRR to avoid read-modify-write later on.
 #define JIO_SET(port,pins) port->BSRR = (pins)

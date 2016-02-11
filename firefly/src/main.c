@@ -22,6 +22,6 @@ int main(void) {
   chip_init();
   while(1) {
     UID_flash();
-    SERIAL_put('B');
+    SERIAL_logVerbose("Hello world!");
   }
 }
