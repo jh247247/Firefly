@@ -1,5 +1,5 @@
 # put your *.o targets here, make should handle the rest!
-SRCS = main.c system_stm32f0xx.c led.c uid.c uid_flash.c delay.c
+SRCS = main.c system_stm32f0xx.c led.c uid.c uid_flash.c delay.c serial.c
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 PROJ_NAME=main
@@ -49,7 +49,6 @@ CFLAGS += -I inc -I $(STD_PERIPH_LIB) -I $(STD_PERIPH_LIB)/CMSIS/Device/ST/STM32
 CFLAGS += -I $(JIO_LIB)
 CFLAGS += -I $(STD_PERIPH_LIB)/CMSIS/Include -I $(STD_PERIPH_LIB)/STM32F0xx_StdPeriph_Driver/inc
 CFLAGS += -include $(STD_PERIPH_LIB)/stm32f0xx_conf.h
-CFLAGS +=
 
 SRCS += Device/startup_stm32f0xx.s # add startup file to build
 
@@ -83,6 +82,8 @@ size:
 
 program: all
 	stm32flash -i dtr,-rts,-dtr:dtr,rts,-dtr /dev/ttyUSB0 -b 115200 -w $(PROJ_NAME).bin -R
+run:
+	stm32flash -i dtr,rts,-dtr:dtr,rts,-dtr /dev/ttyUSB0 -b 115200
 
 clean:
 	find ./ -name '*~' | xargs rm -f	

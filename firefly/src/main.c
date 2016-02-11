@@ -4,13 +4,15 @@
 #include <jio.h>
 #include <led.h>
 #include <uid.h>
-
+#include <serial.h>
 
 //reset chip
 void chip_init(void) {
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
   //  SystemCoreClockUpdate();
   LED_Init();
+
+  SERIAL_init(115200);
 }
 
 int main(void) {
@@ -20,5 +22,6 @@ int main(void) {
   chip_init();
   while(1) {
     UID_flash();
+    SERIAL_put('B');
   }
 }
