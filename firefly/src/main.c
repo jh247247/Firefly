@@ -6,6 +6,11 @@
 #include <uid.h>
 #include <serial.h>
 #include <spi.h>
+#include <nrf24l01.h>
+
+#define PRINT_HEX_8b(c) {const char lt[17] = "01234567890ABCDEF"; char b[3]; \
+    b[0] = lt[c&0x0F]; b[1] = lt[(c&0xF0)>>4]; b[2] = '\0';		\
+    SERIAL_logVerbose(b);}
 
 //reset chip
 void chip_init(void) {
@@ -15,6 +20,7 @@ void chip_init(void) {
 
   SERIAL_init(115200);
   SPI_init();
+  NRF_init();
 }
 
 int main(void) {
@@ -22,8 +28,11 @@ int main(void) {
   chip_init();
   while(1) {
     UID_flash();
-    SERIAL_logVerbose("Test SPI");
-    rec = SPI_transfer("A");
-    SERIAL_logVerbose(rec);
+    SERIAL_logVerbose("Status: ");
+    PRINT_HEX_8b(NRF_readStatus());
+    SERIAL_logVerbose("Transmitting...");
+    NRF_write("HELLO",5);
+    SERIAL_logVerbose("DONE");
+    delay(500000);
   }
 }

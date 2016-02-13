@@ -30,7 +30,7 @@ void SPI_init() {
   drain = SPI1->SR;                              // dummy read of SR to clear MODF
 
   // enable SSM, set SSI, enable SPI, PCLK/64, LSB First Master
-  SPI1->CR1 = SPI_CR1_SSM|SPI_CR1_SSI|SPI_BaudRatePrescaler_64|SPI_Mode_Master|SPI_Direction_2Lines_FullDuplex;
+  SPI1->CR1 = SPI_CR1_SSM|SPI_CR1_SSI|SPI_BaudRatePrescaler_8|SPI_Mode_Master|SPI_Direction_2Lines_FullDuplex;
   SPI1->CR2 = SPI_DataSize_8b;   // configure for 8 bit operation
 
   SPI_RxFIFOThresholdConfig(SPI1, SPI_RxFIFOThreshold_QF);
