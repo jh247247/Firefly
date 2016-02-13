@@ -5,6 +5,7 @@
 #include <led.h>
 #include <uid.h>
 #include <serial.h>
+#include <spi.h>
 
 //reset chip
 void chip_init(void) {
@@ -13,15 +14,16 @@ void chip_init(void) {
   LED_Init();
 
   SERIAL_init(115200);
+  SPI_init();
 }
 
 int main(void) {
-  int del = 5000;
-  int cyc = 0;
-  unsigned char col = 0;
+  char rec;
   chip_init();
   while(1) {
     UID_flash();
-    SERIAL_logVerbose("Hello world!");
+    SERIAL_logVerbose("Test SPI");
+    rec = SPI_transfer("A");
+    SERIAL_logVerbose(rec);
   }
 }

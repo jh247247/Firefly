@@ -46,6 +46,15 @@ void JIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef GPIO_InitStruct);
                                           __VA_ARGS__                   \
                                           })
 
+#define JIO_setIn(port,...) JIO_Init(port,                             \
+                                      (GPIO_InitTypeDef){               \
+                                        .GPIO_Pin = 0,                  \
+                                          .GPIO_Mode = GPIO_Mode_IN,   \
+                                          .GPIO_Speed = GPIO_Speed_50MHz, \
+                                          .GPIO_PuPd = GPIO_PuPd_NOPULL, \
+                                          __VA_ARGS__                   \
+                                          })
+
 // use BSRR and BRR to avoid read-modify-write later on.
 #define JIO_SET(port,pins) port->BSRR = (pins)
 #define JIO_CLR(port,pins) port->BRR = (pins)
