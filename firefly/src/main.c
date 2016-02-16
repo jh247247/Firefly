@@ -34,13 +34,9 @@ void chip_init(void) {
   JIO_setOut(GPIOB, .GPIO_Pin = GPIO_Pin_1);
 
   NRF_init();
-  NRF_openReadingPipe(0, 0xe7e7e7e7e7);
-  NRF_openWritingPipe(0xe7e7e7e7e7);
   NRF_startListening();
-  NRF_powerUp();
-  NRF_writeReg(CONFIG, MASK_TX_DS | EN_CRC | CRCO | PWR_UP);
 
-
+  NRF_printStatus();
 }
 
 int main(void) {
@@ -66,11 +62,13 @@ int main(void) {
     }
 
     UID_flash();
+    UID_flash();
     PRINT_HEX_8b(buf[0]);
     PRINT_HEX_8b(buf[1]);
     PRINT_HEX_8b(buf[2]);
     SERIAL_put('\n');
     NRF_flushRx();
+    NRF_write("HELLO",5);
     //NRF_printStatus();
   }
 }
