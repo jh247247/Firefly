@@ -64,9 +64,10 @@ IPAddress ESPmDNS::getIpFromHostname(const char * hostname)
 
   
   // ### RECV RESPONSE ###
-  
+  int start = millis();
+  int timeout = 500;
   int packetLength = 0;
-  while (!packetLength) {
+  while (!packetLength && millis() - start < timeout) {
     packetLength = udp.parsePacket();
   }
   
