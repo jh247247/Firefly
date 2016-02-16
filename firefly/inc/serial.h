@@ -9,7 +9,7 @@ extern const char* SERIAL_DEBMSG;
 
 // this is for the STM32F030, so we want to use PA9 and PA10 alternate functions
 void SERIAL_init(int baud);
-#define SERIAL_put(c) while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); USART1->TDR = c
+void SERIAL_put(char c);
 #define SERIAL_get() USART1->RDR
 
 unsigned int SERIAL_getDelimited(char* buf, char delimiter);

@@ -110,11 +110,10 @@ typedef enum { RF24_PA_MIN = 0,RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX, RF24_PA_E
 typedef enum { RF24_1MBPS = 0, RF24_2MBPS, RF24_250KBPS } rf24_datarate_e;
 typedef enum { RF24_CRC_DISABLED = 0, RF24_CRC_8, RF24_CRC_16 } rf24_crclength_e;
 
-#define NRF_readReg(reg) NRF_cmd(R_REGISTER | (REGISTER_MASK & reg))
-#define NRF_writeReg(reg, data) NRF_wcmd(W_REGISTER | (REGISTER_MASK & reg), data)
+uint8_t NRF_readReg(uint8_t reg);
+uint8_t NRF_writeReg(uint8_t reg, uint8_t data);
 #define NRF_setChannel(chan)  NRF_writeReg(RF_CH, chan>127 ? 127 : chan)
 
-#define NRF_readStatus() NRF_cmd(NOP)
 #define NRF_flushTx() NRF_cmd(FLUSH_TX)
 #define NRF_flushRx() NRF_cmd(FLUSH_RX)
 
@@ -122,6 +121,7 @@ typedef enum { RF24_CRC_DISABLED = 0, RF24_CRC_8, RF24_CRC_16 } rf24_crclength_e
 #define NRF_powerDown() NRF_writeReg(CONFIG,NRF_readReg(CONFIG) | (1<<PWR_UP))
 
 void NRF_init();
+uint8_t NRF_readStatus();
 uint8_t NRF_cmd(uint8_t reg);
 uint8_t NRF_wcmd(uint8_t reg, uint8_t data);
 uint8_t NRF_readMultibyteReg(uint8_t reg, uint8_t* buf, uint8_t len);
@@ -129,5 +129,7 @@ void NRF_setPALevel(nrf24_pa_dbm_e level);
 
 uint8_t NRF_setDataRate(rf24_datarate_e speed);
 void NRF_setCRCLength(rf24_crclength_e length);
+
+void NRF_printStatus();
 
 #endif /* NRF24L01_H */

@@ -34,6 +34,11 @@ void SERIAL_init(int baud) {
   USART_Cmd(USART1,ENABLE);
 }
 
+void SERIAL_put(char c) {
+  while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+  USART1->TDR = c;
+}
+
 unsigned int SERIAL_getDelimited(char* buf, char delimiter) {
   unsigned int len = 0;
   do {

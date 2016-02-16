@@ -5,46 +5,87 @@
 #include <stm32f0xx.h>
 #include "nrf24l01.h"
 
+#define putstr(s) SERIAL_putString(s)
+#define put(s) SERIAL_put(s)
+
+#ifndef PRINT_HEX_8b
+#define PRINT_HEX_8b(c) {const char lt[] = "0123456789ABCDEF";  \
+    put(lt[(c&0xF0)>>4]); put(lt[c&0xF]);}
+#endif
+
+const uint8_t child_pipe[] = {RX_ADDR_P0, RX_ADDR_P1, RX_ADDR_P2, RX_ADDR_P3, RX_ADDR_P4, RX_ADDR_P5};
+const uint8_t child_payload_size[] = {RX_PW_P0, RX_PW_P1, RX_PW_P2, RX_PW_P3, RX_PW_P4, RX_PW_P5};
+const uint8_t child_pipe_enable[] = {ERX_P0, ERX_P1, ERX_P2, ERX_P3, ERX_P4, ERX_P5};
+
 #define NRF_CE_PORT GPIOA
 #define NRF_CE_PIN GPIO_Pin_4
-#define NRF_CE_INIT JIO_setOut(GPIOA, .GPIO_Pin = NRF_CE_PIN);
-#define NRF_CE_SET JIO_SET(NRF_CS_PORT, NRF_CS_PIN)
-#define NRF_CE_CLR JIO_CLR(NRF_CS_PORT, NRF_CS_PIN)
+#define NRF_CE_INIT JIO_setOut(NRF_CE_PORT, .GPIO_Pin = NRF_CE_PIN);
+#define NRF_CE_SET JIO_SET(NRF_CE_PORT, NRF_CE_PIN)
+#define NRF_CE_CLR JIO_CLR(NRF_CE_PORT, NRF_CE_PIN)
 
 #define NRF_CS_PORT GPIOB
 #define NRF_CS_PIN GPIO_Pin_1
-#define NRF_CS_INIT JIO_setOut(GPIOA, .GPIO_Pin = NRF_CS_PIN);
-#define NRF_CS_SET JIO_SET(NRF_CE_PORT, NRF_CE_PIN)
-#define NRF_CS_CLR JIO_CLR(NRF_CE_PORT, NRF_CE_PIN)
+#define NRF_CS_INIT JIO_setOut(NRF_CS_PORT, .GPIO_Pin = NRF_CS_PIN);
+#define NRF_CS_SET JIO_SET(NRF_CS_PORT, NRF_CS_PIN)
+#define NRF_CS_CLR JIO_CLR(NRF_CS_PORT, NRF_CS_PIN)
 
-#define DELAY_TIME 5000
+#define NRF_IRQ_PORT GPIOA
+#define NRF_IRQ_PIN GPIO_Pin_2
+#define NRF_IRQ_INIT JIO_setIn(NRF_IRQ_PORT, .GPIO_Pin = NRF_IRQ_PIN);
+#define NRF_IRQ_READ JIO_GET(NRF_IRQ_PORT, NRF_IRQ_PIN)
+
+/* TODO: REDUCE ME (or at least make the CPU sleep for this time...) */
+
+#define DELAY_TIME 1000
 
 uint8_t g_p_variant = 0;
-uint8_t g_payloadSize = 0;
+uint8_t g_payloadSize = 32;
 uint8_t g_dynamicPayloads = 0;
 uint64_t g_pipe0ReadingAddress;
 
-// send a single command, always gives status.
-uint8_t NRF_cmd(uint8_t reg) {
-  uint8_t status;
+uint8_t NRF_readStatus() {
+  uint8_t ret;
+
+  delay(DELAY_TIME);
 
   NRF_CS_CLR;
 
-  status = SPI_transfer(reg);
+  ret = SPI_transfer(NOP);
 
   NRF_CS_SET;
-  return status;
+  return ret;
 }
+
+uint8_t NRF_cmd(uint8_t reg) {
+  uint8_t ret;
+
+  delay(DELAY_TIME);
+
+  NRF_CS_CLR;
+  SPI_transfer(reg);
+  ret = SPI_transfer(0xFF);
+  NRF_CS_SET;
+  return ret;
+}
+
+uint8_t NRF_readReg(uint8_t reg) {
+  return NRF_cmd(R_REGISTER | (REGISTER_MASK & (reg)));
+}
+
+uint8_t NRF_writeReg(uint8_t reg, uint8_t data) {
+  return NRF_wcmd(W_REGISTER | (REGISTER_MASK & (reg)), (data));
+}
+
 
 // write data to reg
 uint8_t NRF_wcmd(uint8_t reg, uint8_t data) {
   uint8_t status;
 
-  NRF_CS_CLR;
+  delay(DELAY_TIME);
 
+  NRF_CS_CLR;
   status = SPI_transfer(reg);
   SPI_transfer(data);
-
   NRF_CS_SET;
   return status;
 }
@@ -52,20 +93,30 @@ uint8_t NRF_wcmd(uint8_t reg, uint8_t data) {
 // write to multiple registers
 uint8_t NRF_readMultibyteReg(uint8_t reg, uint8_t* buf, uint8_t len) {
   uint8_t ret;
+  NRF_CS_CLR;
+  delay(DELAY_TIME);
   ret = SPI_transfer(R_REGISTER | (REGISTER_MASK & reg));
+  delay(50);
   while(len--) {
     *buf++ = SPI_transfer(0xFF);
   }
+  NRF_CS_SET;
+  delay(DELAY_TIME);
   return ret;
 }
 
 // write to multiple registers
 uint8_t NRF_writeMultibyteReg(uint8_t reg, const uint8_t* buf, uint8_t len) {
   uint8_t ret;
+  NRF_CS_CLR;
+  delay(DELAY_TIME);
   ret = SPI_transfer(W_REGISTER | (REGISTER_MASK & reg));
+  delay(50);
   while(len--) {
     SPI_transfer(*buf++);
   }
+  NRF_CS_SET;
+  delay(DELAY_TIME);
   return ret;
 }
 
@@ -167,6 +218,8 @@ uint8_t NRF_writePayload(const void* buf, uint8_t len) {
   uint8_t data_len = len > g_payloadSize ? len : g_payloadSize;
   uint8_t blank_len = g_dynamicPayloads ? 0 : g_payloadSize - data_len;
 
+  NRF_flushTx();
+
   NRF_CS_CLR;
   status = SPI_transfer( W_TX_PAYLOAD );
   while ( data_len-- )
@@ -189,6 +242,7 @@ void NRF_setAutoAck(uint8_t enable)
 void NRF_init() {
   NRF_CE_INIT;
   NRF_CS_INIT;
+  NRF_IRQ_INIT;
 
   NRF_CE_CLR;
   NRF_CS_SET;
@@ -198,7 +252,7 @@ void NRF_init() {
 
   NRF_writeReg(SETUP_RETR, (0b0100 << ARD) | (0b1111 << ARC));
 
-  NRF_setPALevel(RF24_PA_MAX);
+  NRF_setPALevel(RF24_PA_MIN);
 
   if( NRF_setDataRate( RF24_250KBPS ) )
     {
@@ -226,6 +280,14 @@ void NRF_init() {
   NRF_flushTx();
 
   NRF_setAutoAck(0);
+
+  NRF_writeReg(RX_ADDR_P2, 0xC3);
+  NRF_writeReg(RX_ADDR_P3, 0xC4);
+  NRF_writeReg(RX_ADDR_P4, 0xC5);
+  NRF_writeReg(RX_ADDR_P5, 0xC6);
+
+  NRF_writeReg(CONFIG, NRF_readReg(CONFIG) | MASK_TX_DS | 0x0E);
+
 }
 
 void NRF_startListening(void)
@@ -256,62 +318,152 @@ void NRF_stopListening(void)
   NRF_flushRx();
 }
 
-void NRF_startWrite( const void* buf, uint8_t len )
+void NRF_openWritingPipe(uint64_t value)
 {
-  // Transmitter power-up
-  NRF_writeReg(CONFIG, ( NRF_readReg(CONFIG) | (1<<PWR_UP) ) & ~(1<<PRIM_RX) );
-  delay(DELAY_TIME);
+  // Note that AVR 8-bit uC's store this LSB first, and the NRF24L01(+)
+  // expects it LSB first too, so we're good.
 
-  // Send the payload
-  NRF_writePayload( buf, len );
+  NRF_writeMultibyteReg(RX_ADDR_P0, (uint8_t*)(&value), 5);
+  NRF_writeMultibyteReg(TX_ADDR, (uint8_t*)(&value), 5);
 
-  // Allons!
-  NRF_CE_SET;
-  delay(DELAY_TIME);
-  NRF_CE_CLR;
+  const uint8_t max_payload_size = 32;
+  NRF_writeReg(RX_PW_P0, g_payloadSize>max_payload_size ? max_payload_size : g_payloadSize);
+}
+
+
+void NRF_openReadingPipe(uint8_t child, uint64_t address)
+{
+  // If this is pipe 0, cache the address.  This is needed because
+  // openWritingPipe() will overwrite the pipe 0 address, so
+  // startListening() will have to restore it.
+  if (child == 0)
+    g_pipe0ReadingAddress = address;
+
+  if (child <= 6)
+    {
+      // For pipes 2-5, only write the LSB
+      if ( child < 2 )
+        NRF_writeMultibyteReg(child_pipe[child], (const uint8_t*)(&address), 5);
+      else
+        NRF_writeMultibyteReg(child_pipe[child], (const uint8_t*)(&address), 1);
+
+      NRF_writeReg(child_payload_size[child],g_payloadSize);
+
+      // Note it would be more efficient to set all of the bits for all open
+      // pipes at once.  However, I thought it would make the calling code
+      // more simple to do it this way.
+      NRF_writeReg(EN_RXADDR, NRF_readReg(EN_RXADDR) | (1<<child_pipe_enable[child]));
+    }
 }
 
 uint8_t NRF_write( const void* buf, uint8_t len )
 {
-  uint8_t result = 0;
 
-  // Begin the write
-  NRF_startWrite(buf,len);
+}
 
-  // ------------
-  // At this point we could return from a non-blocking write, and then call
-  // the rest after an interrupt
+// confirmed working 16-02-2016 JH
+// assumes that the NRF is already in reading mode, checks channel 0 for a packet and reads it into a given buffer.
+// limits the write to the buffer size.
+char NRF_read(uint8_t* buf, uint8_t l) {
 
-  // Instead, we are going to block here until we get TX_DS (transmission completed and ack'd)
-  // or MAX_RT (maximum retries, transmission failed).  Also, we'll timeout in case the radio
-  // is flaky and we get neither.
+  uint8_t len = NRF_readReg(RX_PW_P0); /* TODO: handle multiple channels? */
+  // status gets optimized away?
+  uint8_t status = NRF_readStatus();
 
-  // IN the end, the send should be blocking.  It comes back in 60ms worst case, or much faster
-  // if I tighted up the retry logic.  (Default settings will be 1500us.
-  // Monitor the send
-  uint8_t observe_tx;
-  uint8_t status;
-  do
-  {
-    status = NRF_readMultibyteReg(OBSERVE_TX,&observe_tx,1);
+  // choose the minimum of the given buffer length and the packet size
+  len = l>len ? len : l;
+  if(!(status & (1<<RX_DR))) {
+    return -1;
   }
-  while( ! ( status & ( (1<<TX_DS) | (1<<MAX_RT) ) ) ); /* TODO:  timeout... */
 
-  // The part above is what you could recreate with your own interrupt handler,
-  // and then call this when you got an interrupt
-  // ------------
+  /* TODO: remove this delay at some point, or at least reduce it. */
+  delay(DELAY_TIME);
 
-  /* TODO: check if transfer worked... */
+  NRF_CS_CLR;
 
-  // NOTE: NO ACK IN THIS IMPLEMENTATION
+  SPI_transfer(R_RX_PAYLOAD);
+  while(len > 0) {
+    *buf++ = SPI_transfer(0xFF);
+    len--;
+  }
 
-  // Yay, we are done.
+  NRF_CS_SET;
 
-  // Power down
-  NRF_powerDown();
+  delay(DELAY_TIME);
 
-  // Flush buffers (Is this a relic of past experimentation, and not needed anymore??)
-  NRF_flushTx();
+  NRF_writeReg(STATUS, (1<<RX_DR));
+  return len;
+}
 
-  return (status&(1<<TX_DS));
+#define PRINT_BIT(reg,name) putstr(#name); putstr(reg&(1<<name)?" = 1 ":" = 0 ")
+
+void print_address_register(const char* name, uint8_t reg, uint8_t qty)
+{
+  putstr(name);
+  putstr("  ");
+
+  while (qty--)
+    {
+      uint8_t buffer[5];
+      NRF_readMultibyteReg(reg++,buffer,sizeof buffer);
+
+      putstr(" 0x");
+      uint8_t* bufptr = buffer + sizeof buffer;
+      while( --bufptr >= buffer ) {
+        PRINT_HEX_8b((*bufptr));
+      }
+    }
+  putstr("\n");
+}
+
+void print_byte_register(const char* name, uint8_t reg, uint8_t qty)
+{
+  putstr(name);
+  putstr("  ");
+
+  while (qty--) {
+    putstr(" 0x");
+    PRINT_HEX_8b(NRF_readReg(reg));
+    reg++;
+    delay(500);
+  }
+  putstr("\n");
+}
+
+void NRF_printStatus() {
+
+  print_byte_register("CONFIG",CONFIG,1);
+  print_byte_register("EN_AA",EN_AA,1);
+  print_byte_register("EN_RXADDR",EN_RXADDR,1);
+  print_byte_register("SETUP_AW",SETUP_AW,1);
+  print_byte_register("SETUP_RETR",SETUP_RETR,1);
+  print_byte_register("RF_CH",RF_CH,1);
+  print_byte_register("RF_SETUP",RF_SETUP,1);
+  print_byte_register("RF_PWR",RF_PWR,1);
+
+  uint8_t status = NRF_readStatus();
+
+  putstr("STATUS = ");
+  PRINT_HEX_8b(status);
+  putstr(" ");
+  PRINT_BIT(status,RX_DR);
+  PRINT_BIT(status,TX_DS);
+  PRINT_BIT(status,MAX_RT);
+  PRINT_BIT(status,TX_FULL);
+  /* TODO: RX_P_NO */
+  putstr("\n");
+
+  print_byte_register("OBSERVE_TX",OBSERVE_TX,1);
+  print_byte_register("RPD",RPD,1);
+
+  print_address_register("RX_ADDR_P0-1",RX_ADDR_P0,2);
+  print_byte_register("RX_ADDR_P2-5",RX_ADDR_P2,4);
+
+  print_address_register("TX_ADDR",TX_ADDR,1);
+
+  print_byte_register("RX_PW_P0-6",RX_PW_P0,6);
+
+  print_byte_register("FIFO_STATUS",FIFO_STATUS,1);
+  print_byte_register("DYNPD",DYNPD,1);
+  print_byte_register("FEATURE",FEATURE,1);
 }

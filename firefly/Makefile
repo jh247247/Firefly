@@ -32,7 +32,7 @@ OBJCOPY=arm-none-eabi-objcopy
 OBJDUMP=arm-none-eabi-objdump
 SIZE=arm-none-eabi-size
 
-CFLAGS  = -Wall -g -std=c99 -Os -flto
+CFLAGS  = -Wall -g -std=c99 -O2 -flto
 #CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m0 -march=armv6s-m/usr/local/share/openocd/scripts/board
 CFLAGS += -mlittle-endian -mcpu=cortex-m0  -march=armv6-m -mthumb
 CFLAGS += -ffunction-sections -fdata-sections
