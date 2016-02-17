@@ -19,7 +19,7 @@ void chip_init(void) {
   RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
 
   /* Set HCLK, PCLK1, and PCLK2 to SCLK (these are default */
-  RCC_HCLKConfig(RCC_SYSCLK_Div4);
+  RCC_HCLKConfig(RCC_SYSCLK_Div1);
   //RCC_PCLK1Config(RCC_HCLK_Div1);
   //RCC_PCLK2Config(RCC_HCLK_Div1);
 
@@ -30,8 +30,6 @@ void chip_init(void) {
   SERIAL_init(115200);
   SPI_init();
 
-
-  JIO_setOut(GPIOB, .GPIO_Pin = GPIO_Pin_1);
 
   NRF_init();
   NRF_startListening();
@@ -57,7 +55,7 @@ int main(void) {
 
     //    SERIAL_put('\n');
 
-    if(NRF_read(buf, 3) == 0xFF) {
+    if(!NRF_available()) {
       continue;
     }
 
@@ -69,6 +67,6 @@ int main(void) {
     SERIAL_put('\n');
     NRF_flushRx();
     NRF_write("HELLO",5);
-    //NRF_printStatus();
+    NRF_printStatus();
   }
 }

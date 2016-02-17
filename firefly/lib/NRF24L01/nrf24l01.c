@@ -32,8 +32,8 @@
 
 #define MAX_PAYLOAD_SIZE 32
 
-/* TODO: REDUCE ME (or at least make the CPU sleep for this time...) */
-#define DELAY_TIME 1000
+// minimum delay that CS has to be high is about 17us between commands.
+#define DELAY_TIME 15
 
 uint8_t NRF_readStatus() {
   uint8_t ret;
@@ -60,11 +60,11 @@ uint8_t NRF_cmd(uint8_t reg) {
   return ret;
 }
 
-uint8_t NRF_readReg(uint8_t reg) {
+inline uint8_t NRF_readReg(uint8_t reg) {
   return NRF_cmd(R_REGISTER | (REGISTER_MASK & (reg)));
 }
 
-uint8_t NRF_writeReg(uint8_t reg, uint8_t data) {
+inline uint8_t NRF_writeReg(uint8_t reg, uint8_t data) {
   return NRF_wcmd(W_REGISTER | (REGISTER_MASK & (reg)), (data));
 }
 
@@ -85,10 +85,9 @@ uint8_t NRF_wcmd(uint8_t reg, uint8_t data) {
 // write to multiple registers
 uint8_t NRF_readMultibyteReg(uint8_t reg, uint8_t* buf, uint8_t len) {
   uint8_t ret;
-  NRF_CS_CLR;
   delay(DELAY_TIME);
+  NRF_CS_CLR;
   ret = SPI_transfer(R_REGISTER | (REGISTER_MASK & reg));
-  delay(50);
   while(len--) {
     *buf++ = SPI_transfer(0xFF);
   }
@@ -100,10 +99,9 @@ uint8_t NRF_readMultibyteReg(uint8_t reg, uint8_t* buf, uint8_t len) {
 // write to multiple registers
 uint8_t NRF_writeMultibyteReg(uint8_t reg, const uint8_t* buf, uint8_t len) {
   uint8_t ret;
-  NRF_CS_CLR;
   delay(DELAY_TIME);
+  NRF_CS_CLR;
   ret = SPI_transfer(W_REGISTER | (REGISTER_MASK & reg));
-  delay(50);
   while(len--) {
     SPI_transfer(*buf++);
   }
@@ -160,20 +158,15 @@ void NRF_init() {
   delay(DELAY_TIME);
 
   NRF_setPALevel(RF24_PA_MIN);
-  delay(DELAY_TIME);
-
-
   // Disable dynamic payloads, to match dynamic_payloads_enabled setting
   NRF_writeReg(DYNPD,0);
-  delay(DELAY_TIME);
 
+  // set to defaults
   NRF_writeReg(RF_SETUP, 0x00); /* TODO: make datarate 2mbps for lower range... */
-  delay(DELAY_TIME);
 
   // Reset current status
   // Notice reset and flush is the last thing we do
   NRF_writeReg(STATUS,(1<<RX_DR) | (1<<TX_DS) | (1<<MAX_RT) );
-  delay(DELAY_TIME);
 
   // Set up default configuration.  Callers can always change it later.
   // This channel should be universally safe and not bleed over into adjacent
@@ -182,22 +175,14 @@ void NRF_init() {
 
   // Flush buffers
   NRF_flushRx();
-  delay(DELAY_TIME);
   NRF_flushTx();
-  delay(DELAY_TIME);
 
   // disable auto ack...
   NRF_writeReg(EN_AA, 0);
-
-  delay(DELAY_TIME);
-
   NRF_writeReg(CONFIG, 0x0E);
-  //NRF_writeReg();
-  delay(DELAY_TIME);
 
   // enable P0, should do more at some stage
   NRF_writeReg(EN_RXADDR, (1<<ERX_P0));
-  delay(DELAY_TIME);
   NRF_writeReg(RX_PW_P0,MAX_PAYLOAD_SIZE);
 }
 
@@ -231,52 +216,39 @@ uint8_t NRF_write( const uint8_t* buf, uint8_t len ) {
   // set len to the minimum of max payload and the given len
   len = len>MAX_PAYLOAD_SIZE ? MAX_PAYLOAD_SIZE : len;
 
-  delay(DELAY_TIME);
-
-  put('c');
-  put(NRF_readReg(CONFIG));
-  put('\n');
   NRF_CE_CLR;
 
   // set into writing mode
   NRF_writeReg(CONFIG, (NRF_readReg(CONFIG) | (1<<PWR_UP)) & ~(1<<PRIM_RX));
-  delay(DELAY_TIME);
 
-  put('d');
-  put(NRF_readReg(CONFIG));
-  put('\n');
+  delay(DELAY_TIME);
 
   NRF_CS_CLR;
-  delay(DELAY_TIME);
   SPI_transfer(W_TX_PAYLOAD); // start transferring payload
-  delay(DELAY_TIME);
   for(i = 0; i < MAX_PAYLOAD_SIZE; i++) {
     if(i < len) {
       SPI_transfer(*(buf+i));
     } else {
       SPI_transfer(0x00); // have to send blanks, since payload size is fixed
     }
-    delay(DELAY_TIME);
   }
+  delay(DELAY_TIME);
   NRF_CS_SET;
 
-  delay(DELAY_TIME);
   NRF_CE_SET;
   uint8_t status = NRF_readStatus();
   while(!(status & (1<<TX_DS))) {
-    put(status);
-    put('\n');
     status = NRF_readStatus();
   }
 
   NRF_CE_CLR;
-  delay(DELAY_TIME);
-
-  put('b');
-  put(NRF_readStatus());
-  put('\n');
-
+  /* TODO: Power down? */
   NRF_startListening();
+}
+
+// tells us if there is a packet available on one of the listening pipes
+uint8_t NRF_available() {
+  return (NRF_readStatus() & (1<<RX_DR));
 }
 
 // confirmed working 16-02-2016 JH
@@ -290,24 +262,21 @@ char NRF_read(uint8_t* buf, uint8_t l) {
 
   // choose the minimum of the given buffer length and the packet size
   len = l>len ? len : l;
-  if(!(status & (1<<RX_DR))) {
+  if(!(NRF_available())) {
     return -1;
   }
 
-  /* TODO: remove this delay at some point, or at least reduce it. */
   delay(DELAY_TIME);
 
   NRF_CS_CLR;
 
-  SPI_transfer(R_RX_PAYLOAD);
+  SPI_transfer(R_RX_PAYLOAD); // read rx payload
   while(len > 0) {
     *buf++ = SPI_transfer(0xFF);
     len--;
   }
 
   NRF_CS_SET;
-
-  delay(DELAY_TIME);
 
   NRF_writeReg(STATUS, (1<<RX_DR));
   return len;
@@ -343,7 +312,7 @@ void print_byte_register(const char* name, uint8_t reg, uint8_t qty)
     putstr(" 0x");
     PRINT_HEX_8b(NRF_readReg(reg));
     reg++;
-    delay(500);
+    delay(DELAY_TIME);
   }
   putstr("\n");
 }
