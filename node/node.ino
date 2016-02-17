@@ -48,15 +48,15 @@ void recvFakePacket();
 
 // nrf globals
 RF24 g_radio_nrf(16, 15);
-byte address[5] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
+byte address[6] = "TEST1";
 byte mac[6];
 byte rx_packet[6];
 
 // Update these with values suitable for your network.
-const char* ssid = "Home&Hosed";
-const char* password = "143c91ffbf323f9b07439610a4";
-const char* monitorHostname = "raspberrypi";
-
+const char* ssid = "linksys";
+const char* password = "0000000000";
+const char* monitorHostname = "raspi";
+ 
 // Networking globals
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -74,15 +74,14 @@ void setup() {
   Serial.begin(115200);
 
   g_radio_nrf.begin();
+  g_radio_nrf.printDetails();
 
-
-
+  g_radio_nrf.setPayloadSize(sizeof(mac)); // we want to send the mac address so we can confirm.
   g_radio_nrf.setPALevel(RF24_PA_MIN);
   g_radio_nrf.setAutoAck(false);
 
   g_radio_nrf.openWritingPipe(address);
-  g_radio_nrf.openReadingPipe(0, address);
-  g_radio_nrf.setPayloadSize(32); // we want to send the mac address so we can confirm.
+  g_radio_nrf.openReadingPipe(1, address);
 
   g_radio_nrf.startListening();
 
@@ -93,8 +92,6 @@ void setup() {
 
   client.setServer(monIp, 1883);
   client.setCallback(callback);
-
-  g_radio_nrf.printDetails();
 }
 
 void setup_wifi() {
@@ -124,7 +121,7 @@ void setup_host() {
   while(monIp == INADDR_NONE) {
     monIp = espmDNS.getIpFromHostname(monitorHostname);
   }
-
+  
 
   Serial.print("Monitor IP: ");
   Serial.println(monIp);
@@ -152,7 +149,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   setup_host();
-
+  
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -177,7 +174,6 @@ void reconnect() {
 
 void loop() {
   bool timeout = false;
-  uint8_t packetrec = 0;
 
   g_radio_nrf.stopListening();
 
@@ -196,15 +192,15 @@ void loop() {
     PRINT_HEX(rx_packet,sizeof(rx_packet));
     Serial.print(" @ ");
     Serial.println(millis());
-    packetrec = 1;
-  } else if (value % 5 == 0) {
-    Serial.println("Fake packet received!");
-    recvFakePacket();
-    packetrec = 2;
   } else {
-    Serial.println("No packet received!");
+    
+    if (value % 5 == 0) {
+      Serial.println("Fake packet received!");
+      recvFakePacket();
+    } else {
+      Serial.println("No packet received!");
+    }
   }
-
 
   if (!client.connected()) {
     reconnect();
@@ -212,7 +208,7 @@ void loop() {
   client.loop();
 
   ++value;
-  snprintf (msg, 75, "{\"nodeId\":\"%X%X%X\",\"val\":%d, \"prec\":%d}", mac[0],mac[1],mac[2],value,packetrec);
+  snprintf (msg, 75, "{\"nodeId\":\"%X%X%X\",\"val\":%d}", mac[0],mac[1],mac[2],value);
   Serial.print("Publish message with node data: ");
   Serial.println(msg);
   client.publish("node", msg);
@@ -226,3 +222,4 @@ void recvFakePacket() {
   Serial.println(msg);
   client.publish("firefly", msg);
 }
+
