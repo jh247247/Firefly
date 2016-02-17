@@ -210,7 +210,7 @@ void NRF_stopListening(void)
   NRF_flushRx();
 }
 
-
+// BENCHMARK: 1.2ms for 32 byte transmit, cpu side.
 uint8_t NRF_write( const uint8_t* buf, uint8_t len ) {
   uint8_t i;
   // set len to the minimum of max payload and the given len

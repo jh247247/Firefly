@@ -30,7 +30,6 @@ void chip_init(void) {
   SERIAL_init(115200);
   SPI_init();
 
-
   NRF_init();
   NRF_startListening();
 
@@ -66,7 +65,9 @@ int main(void) {
     PRINT_HEX_8b(buf[2]);
     SERIAL_put('\n');
     NRF_flushRx();
+    LED_ON(BLUE);
     NRF_write("HELLO",5);
+    LED_OFF(BLUE);
     NRF_printStatus();
   }
 }
