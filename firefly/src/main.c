@@ -6,14 +6,11 @@
 #include <spi.h>
 #include <nrf24l01.h>
 
+int test __attribute__((__section__(".persistent"),used));
 
 #define PRINT_HEX_8b(c) {const char lt[] = "0123456789ABCDEF";  \
     SERIAL_put(lt[(c&0xF0)>>4]); SERIAL_put(lt[c&0xF]);}
 
-
-void RESET_Handler() {
-
-}
 
 //reset chip
 void chip_init(void) {
@@ -32,7 +29,10 @@ void chip_init(void) {
   SPI_init();
 
   NRF_init();
-  NRF_startListening();
+  SERIAL_putString("RESET\n");
+  test++;
+  PRINT_HEX_8b(test);
+  SERIAL_put('\n');
 
   IWDG_Enable();
   IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
@@ -56,8 +56,7 @@ int main(void) {
 
   chip_init();
 
-
-  NRF_write("HELLO",5);
+  NRF_write(test,4);
 
   while(1) {
     //rec = NRF_readReg(CONFIG);
@@ -86,6 +85,7 @@ int main(void) {
   PRINT_HEX_8b(buf[0]);
   PRINT_HEX_8b(buf[1]);
   PRINT_HEX_8b(buf[2]);
+  SERIAL_put('\n');
 
   chip_sleep();
 }
