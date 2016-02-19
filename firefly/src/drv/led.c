@@ -15,7 +15,7 @@ LED_Properties gLED[3] = {{.pin = LED_RED_PIN},
 /* TODO: setup timer for led shutdown? */
 /* TODO: setup timer for led software pwm */
 
-void LED_Init() {
+inline void LED_Init() {
   JIO_setOut(LED_PORT, .GPIO_Pin = (LED_GREEN_PIN | LED_RED_PIN | LED_BLUE_PIN));
 }
 

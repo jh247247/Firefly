@@ -51,6 +51,8 @@ void UID_flash() {
   UID_Bytes id;
   id.i = UID_get();
 
+  LED_Init(); // led is shared with serial port
+
   delay((DELAY_TICKS+LED_OVERHEAD)*PREAMBLE_BITS);
   UID_preamble();
   for(int i = 0; i < DATA_BITS; i++) {
@@ -82,5 +84,5 @@ void UID_flash() {
   }
   LED_ALL_OFF;
   UID_preamble();
-  delay((DELAY_TICKS+LED_OVERHEAD)*PREAMBLE_BITS);
+  SERIAL_init();
 }
