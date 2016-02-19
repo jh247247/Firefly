@@ -1,6 +1,4 @@
 #include <stm32f0xx.h>
-#include "stm32f0xx_rcc.h"
-#include "stm32f0xx_gpio.h"
 #include <jio.h>
 #include <led.h>
 #include <uid.h>
@@ -13,6 +11,9 @@
     SERIAL_put(lt[(c&0xF0)>>4]); SERIAL_put(lt[c&0xF]);}
 
 
+void RESET_Handler() {
+
+}
 
 //reset chip
 void chip_init(void) {
@@ -33,13 +34,31 @@ void chip_init(void) {
   NRF_init();
   NRF_startListening();
 
-  NRF_printStatus();
+  IWDG_Enable();
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+  IWDG_SetPrescaler(IWDG_Prescaler_256);
+  IWDG_SetReload(156); /* TODO: Make this programmable by user... */
+  IWDG_ReloadCounter();
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Disable);
+}
+
+void chip_sleep() {
+  PWR_BackupAccessCmd(DISABLE);
+  PWR_PVDCmd(DISABLE);
+  // although standby is lower power (by quite a bit) we need to have some volatile memory.
+  // Havent hacked the proc to find one yet.
+  PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
 }
 
 int main(void) {
   char rec;
   uint8_t buf[5];
+
   chip_init();
+
+
+  NRF_write("HELLO",5);
+
   while(1) {
     //rec = NRF_readReg(CONFIG);
     //PRINT_HEX_8b(rec);
@@ -53,21 +72,20 @@ int main(void) {
     //NRF_printStatus();
 
     //    SERIAL_put('\n');
-
-    if(!NRF_available()) {
-      continue;
+    if(NRF_available()) {
+      break;
     }
-
-    UID_flash();
-    UID_flash();
-    PRINT_HEX_8b(buf[0]);
-    PRINT_HEX_8b(buf[1]);
-    PRINT_HEX_8b(buf[2]);
-    SERIAL_put('\n');
-    NRF_flushRx();
-    LED_ON(BLUE);
-    NRF_write("HELLO",5);
-    LED_OFF(BLUE);
-    NRF_printStatus();
+    /* TODO: timeout for read */
   }
+
+  NRF_read(buf,5);
+
+  NRF_powerDown();
+
+  UID_flash();
+  PRINT_HEX_8b(buf[0]);
+  PRINT_HEX_8b(buf[1]);
+  PRINT_HEX_8b(buf[2]);
+
+  chip_sleep();
 }

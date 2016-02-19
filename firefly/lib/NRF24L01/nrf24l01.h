@@ -117,8 +117,7 @@ uint8_t NRF_writeReg(uint8_t reg, uint8_t data);
 #define NRF_flushTx() NRF_cmd(FLUSH_TX)
 #define NRF_flushRx() NRF_cmd(FLUSH_RX)
 
-#define NRF_powerUp() NRF_writeReg(CONFIG,NRF_readReg(CONFIG) & ~(1<<PWR_UP));
-#define NRF_powerDown() NRF_writeReg(CONFIG,NRF_readReg(CONFIG) | (1<<PWR_UP))
+
 
 void NRF_init();
 uint8_t NRF_readStatus();
@@ -129,6 +128,8 @@ void NRF_setPALevel(nrf24_pa_dbm_e level);
 
 uint8_t NRF_setDataRate(rf24_datarate_e speed);
 void NRF_setCRCLength(rf24_crclength_e length);
+void NRF_powerUp();
+void NRF_powerDown();
 
 void NRF_printStatus();
 

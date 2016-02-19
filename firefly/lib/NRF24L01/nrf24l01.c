@@ -157,12 +157,13 @@ void NRF_init() {
   NRF_writeReg(SETUP_RETR, (0b0100 << ARD) | (0b1111 << ARC));
   delay(DELAY_TIME);
 
-  NRF_setPALevel(RF24_PA_MIN);
+
   // Disable dynamic payloads, to match dynamic_payloads_enabled setting
   NRF_writeReg(DYNPD,0);
 
   // set to defaults
   NRF_writeReg(RF_SETUP, 0x00); /* TODO: make datarate 2mbps for lower range... */
+  NRF_setPALevel(RF24_PA_MAX);
 
   // Reset current status
   // Notice reset and flush is the last thing we do
@@ -257,9 +258,8 @@ uint8_t NRF_available() {
 char NRF_read(uint8_t* buf, uint8_t l) {
 
   uint8_t len = NRF_readReg(RX_PW_P0); /* TODO: handle multiple channels? */
-  // status gets optimized away?
-  uint8_t status = NRF_readStatus();
 
+  delay(DELAY_TIME);
   // choose the minimum of the given buffer length and the packet size
   len = l>len ? len : l;
   if(!(NRF_available())) {
@@ -269,17 +269,28 @@ char NRF_read(uint8_t* buf, uint8_t l) {
   delay(DELAY_TIME);
 
   NRF_CS_CLR;
-
+  delay(100);
   SPI_transfer(R_RX_PAYLOAD); // read rx payload
+  delay(100);
   while(len > 0) {
     *buf++ = SPI_transfer(0xFF);
     len--;
+    delay(100);
   }
 
   NRF_CS_SET;
+  delay(DELAY_TIME);
 
   NRF_writeReg(STATUS, (1<<RX_DR));
   return len;
+}
+
+void NRF_powerUp() {
+  NRF_writeReg(CONFIG,NRF_readReg(CONFIG) & ~(1<<PWR_UP));
+  NRF_CE_CLR;
+}
+void NRF_powerDown() {
+  NRF_writeReg(CONFIG,NRF_readReg(CONFIG) | (1<<PWR_UP));
 }
 
 #define PRINT_BIT(reg,name) putstr(#name); putstr(reg&(1<<name)?" = 1 ":" = 0 ")
@@ -354,3 +365,4 @@ void NRF_printStatus() {
   print_byte_register("DYNPD",DYNPD,1);
   print_byte_register("FEATURE",FEATURE,1);
 }
+
