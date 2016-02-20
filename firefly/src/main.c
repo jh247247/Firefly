@@ -33,10 +33,10 @@ void chip_init(void) {
   //  SystemCoreClockUpdate();
 
   // what to do when reset for the first time
-  if(resetCount == 0) {
-    resetsBetweenTransmits = 4; // time between transmits 1s
-    countDownToTransmit = 0;
-  }
+
+  SWITCH_INIT;
+
+
 
   IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
   IWDG_SetPrescaler(IWDG_Prescaler_256);
@@ -47,7 +47,7 @@ void chip_init(void) {
 
   LED_Init();
 
-  SWITCH_INIT;
+
 
   if(countDownToTransmit-- == 0) {
     countDownToTransmit = resetsBetweenTransmits;
@@ -74,6 +74,11 @@ void chip_sleep() {
   SPI_shutdown();
   PWR_BackupAccessCmd(DISABLE);
   PWR_PVDCmd(DISABLE);
+
+  if(resetCount == 0 || SWITCH_READ) { // just in case
+    resetsBetweenTransmits = 4; // time between transmits 1s
+    countDownToTransmit = resetsBetweenTransmits;
+  }
 
   // before sleeping, flash if button pressed
   // kind of detrimental I know...
