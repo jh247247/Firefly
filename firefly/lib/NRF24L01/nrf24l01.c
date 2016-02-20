@@ -27,8 +27,9 @@
 
 #define NRF_IRQ_PORT GPIOA
 #define NRF_IRQ_PIN GPIO_Pin_2
-#define NRF_IRQ_INIT JIO_setIn(NRF_IRQ_PORT, .GPIO_Pin = NRF_IRQ_PIN);
-#define NRF_IRQ_READ JIO_GET(NRF_IRQ_PORT, NRF_IRQ_PIN)
+#define NRF_IRQ_INIT JIO_setOut(NRF_IRQ_PORT, .GPIO_Pin = NRF_IRQ_PIN);
+#define NRF_IRQ_SET JIO_SET(NRF_IRQ_PORT, NRF_IRQ_PIN)
+#define NRF_IRQ_CLR JIO_CLR(NRF_IRQ_PORT, NRF_IRQ_PIN)
 
 #define MAX_PAYLOAD_SIZE 32
 
@@ -148,11 +149,14 @@ void NRF_init() {
   NRF_CS_INIT;
   NRF_IRQ_INIT;
 
+  NRF_IRQ_SET;
+
   NRF_CE_CLR;
   NRF_CS_SET;
 
-  /* TODO:  different delay for reset vs power up.*/
-  delay(DELAY_TIME);
+
+  /* TODO: have cpu sleep during delay to save power... */
+  delay(25000);
 
   NRF_writeReg(SETUP_RETR, (0b0100 << ARD) | (0b1111 << ARC));
   delay(DELAY_TIME);
@@ -187,6 +191,12 @@ void NRF_init() {
   NRF_writeReg(RX_PW_P0,MAX_PAYLOAD_SIZE);
 }
 
+void NRF_deinit() {
+  NRF_IRQ_CLR;
+  NRF_CE_CLR;
+  NRF_CS_CLR;
+}
+
 void NRF_startListening(void)
 {
   NRF_writeReg(CONFIG, NRF_readReg(CONFIG) | (1<<PWR_UP) | (1<<PRIM_RX));
@@ -213,7 +223,7 @@ void NRF_stopListening(void)
 
 // BENCHMARK: 1.2ms for 32 byte transmit, cpu side.
 uint8_t NRF_write( const uint8_t* buf, uint8_t len ) {
-  uint8_t i;
+  uint8_t i,iter = 100;
   // set len to the minimum of max payload and the given len
   len = len>MAX_PAYLOAD_SIZE ? MAX_PAYLOAD_SIZE : len;
 
@@ -238,13 +248,14 @@ uint8_t NRF_write( const uint8_t* buf, uint8_t len ) {
 
   NRF_CE_SET;
   uint8_t status = NRF_readStatus();
-  while(!(status & (1<<TX_DS))) {
+  while(!(status & (1<<TX_DS)) && iter--) {
     status = NRF_readStatus();
   }
 
   NRF_CE_CLR;
   /* TODO: Power down? */
   NRF_startListening();
+  return !iter;
 }
 
 // tells us if there is a packet available on one of the listening pipes
@@ -256,7 +267,6 @@ uint8_t NRF_available() {
 // assumes that the NRF is already in reading mode, checks channel 0 for a packet and reads it into a given buffer.
 // limits the write to the buffer size.
 char NRF_read(uint8_t* buf, uint8_t l) {
-
   uint8_t len = NRF_readReg(RX_PW_P0); /* TODO: handle multiple channels? */
 
   delay(DELAY_TIME);
@@ -286,11 +296,13 @@ char NRF_read(uint8_t* buf, uint8_t l) {
 }
 
 void NRF_powerUp() {
+  NRF_writeReg(CONFIG,NRF_readReg(CONFIG) | (1<<PWR_UP));
+  NRF_CE_SET;
+}
+
+void NRF_powerDown() {
   NRF_writeReg(CONFIG,NRF_readReg(CONFIG) & ~(1<<PWR_UP));
   NRF_CE_CLR;
-}
-void NRF_powerDown() {
-  NRF_writeReg(CONFIG,NRF_readReg(CONFIG) | (1<<PWR_UP));
 }
 
 #define PRINT_BIT(reg,name) putstr(#name); putstr(reg&(1<<name)?" = 1 ":" = 0 ")

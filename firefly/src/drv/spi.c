@@ -16,20 +16,11 @@ void SPI_init() {
 
   // set SCK, MISO and MOSI to alternate function
   JIO_setMode(GPIOA,
-              .GPIO_Pin = GPIO_Pin_5  | GPIO_Pin_7,
+              .GPIO_Pin = GPIO_Pin_5  | GPIO_Pin_6 | GPIO_Pin_7,
               .GPIO_Mode = GPIO_Mode_AF,
               .GPIO_OType = GPIO_OType_PP,
               .GPIO_Speed = GPIO_Speed_2MHz,
               .GPIO_PuPd = GPIO_PuPd_NOPULL);
-
-
-  // MISO needs a pullup, use internal.
-  JIO_setMode(GPIOA,
-              .GPIO_Pin = GPIO_Pin_6,
-              .GPIO_Mode = GPIO_Mode_AF,
-              .GPIO_OType = GPIO_OType_OD,
-              .GPIO_Speed = GPIO_Speed_2MHz,
-              .GPIO_PuPd = GPIO_PuPd_UP);
 
 
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_0);
@@ -49,6 +40,10 @@ void SPI_init() {
 
 // shut down SPI when not being used to save power
 void SPI_shutdown() {
+  JIO_setIn(GPIOA,
+            .GPIO_Pin = GPIO_Pin_5  | GPIO_Pin_6 | GPIO_Pin_7,
+            .GPIO_Mode = GPIO_Mode_AN);
+
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, DISABLE);
 }
 
