@@ -75,6 +75,6 @@ public class DiscoveryFragment extends Fragment {
     }
 
     public void updateNode(Node n) {
-        m_nodeDataView.setText("Val: " + n.val);
+        m_nodeDataView.setText("Firefly list: " + n.fireflies);
     }
 }
