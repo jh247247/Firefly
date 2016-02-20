@@ -50,7 +50,6 @@ def updateNode(nodeDict):
         # see if current firefly exists in list
         f = next(((i,v) for i,v in enumerate(current.get('fireflies')) \
                   if v == nodeDict['firefly']['fireflyID']),None)
-        print(f)
         if f is None:
             currFire = nodeDict['firefly']['fireflyID']
             current['fireflies'].insert(0,currFire)
@@ -63,6 +62,13 @@ def updateFirefly(nodeDict):
     if current is None:
         # does not exist yet, create from this
         current = nodeDict['firefly']
+    else:
+        # we already exist, remove us from previous node
+        # fireflies should only be associated with a single node at a time.
+        if current['nodeId'] != nodeDict['nodeId']:
+            nodes.update({'nodeId' : current['nodeId']},
+                         {'$pull': {'fireflies' : nodeDict['firefly']['fireflyID']}})
+
     # TODO: check power of transmit levels? don't update if updated in last 5 seconds and has lower power level?
 
     # copy over node we are hearing from
