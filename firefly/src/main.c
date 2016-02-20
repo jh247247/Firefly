@@ -7,6 +7,9 @@
 #include <nrf24l01.h>
 
 int resetCount __attribute__((__section__(".persistent"),used));
+uint8_t countDownToTransmit __attribute__((__section__(".persistent"),used));
+uint8_t resetsBetweenTransmits __attribute__((__section__(".persistent"),used));
+uint8_t switchPressed __attribute__((__section__(".persistent"),used));
 
 #define PRINT_HEX_8b(c) {const char lt[] = "0123456789ABCDEF";  \
     SERIAL_put(lt[(c&0xF0)>>4]); SERIAL_put(lt[c&0xF]);}
@@ -30,33 +33,54 @@ void chip_init(void) {
   //  SystemCoreClockUpdate();
 
   // what to do when reset for the first time
-  if(resetCount) {
-    IWDG_Enable();
-    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-    IWDG_SetPrescaler(IWDG_Prescaler_256);
-    IWDG_SetReload(156); /* TODO: Make this programmable by user... */
-    IWDG_ReloadCounter();
-    IWDG_WriteAccessCmd(IWDG_WriteAccess_Disable);
+  if(resetCount == 0) {
+    resetsBetweenTransmits = 4; // time between transmits 1s
+    countDownToTransmit = 0;
   }
 
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+  IWDG_SetPrescaler(IWDG_Prescaler_256);
+  IWDG_SetReload(40);
+  IWDG_ReloadCounter();
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Disable);
+  IWDG_Enable();
+
   LED_Init();
+
   SWITCH_INIT;
 
-  SERIAL_init(115200);
-  SPI_init();
-  NRF_init();
+  if(countDownToTransmit-- == 0) {
+    countDownToTransmit = resetsBetweenTransmits;
 
+    SERIAL_init(115200);
 
-  resetCount++;
-  // scatter the signal strength just in case we are out of range at minimum
-  NRF_setPALevel(resetCount&0x03);
+    SPI_init();
+    NRF_init();
+
+    resetCount++;
+    // scatter the signal strength just in case we are out of range at minimum
+    NRF_setPALevel(resetCount&0x03);
+  } else {
+    switchPressed |= SWITCH_READ;
+    chip_sleep();
+  }
+
 }
 
 void chip_sleep() {
+
+
   NRF_deinit();
   SPI_shutdown();
   PWR_BackupAccessCmd(DISABLE);
   PWR_PVDCmd(DISABLE);
+
+  // before sleeping, flash if button pressed
+  // kind of detrimental I know...
+  while(SWITCH_READ) {
+    UID_flash();
+  }
+
   // although standby is lower power (by quite a bit) we need to have some volatile memory.
   // Havent hacked the proc to find one yet.
   //PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
@@ -75,14 +99,10 @@ int main(void) {
   buf[5] = 0; /* TODO: read battery life */
   buf[6] = 0; /* TODO: read battery life */
   buf[7] = 0; /* TODO: read temperature */
-
-  // wait until reload value flag is reset, then reload value can be read.
-  while(IWDG->SR&IWDG_FLAG_RVU) __asm__("");
-  buf[8] = IWDG->RLR&0xFF;
-  buf[9] = 0|((IWDG->RLR&0xF00)>>8);
+  buf[8] = resetsBetweenTransmits;
 
 
-  if(NRF_write(buf,10)) {
+  if(NRF_write(buf,9)) {
     SERIAL_putString("WRITE FAIL!\n");
     chip_sleep();
   }
@@ -106,10 +126,5 @@ int main(void) {
   SPI_shutdown();
 
   // determine what to do based on rec'd packet
-
-  while(SWITCH_READ) {
-    UID_flash();
-  }
-
   chip_sleep();
 }
