@@ -179,13 +179,13 @@ void loop() {
     Serial.println(millis());
 
     snprintf (msg, 128,
-              "{\"nodeId\":\"%X%X%X\", \"fireflyID\":\"%X%X%X%X\",\"status\":\"%X\",\"bat\":%d,\"temp\":%d,\"timer\":%d}",
+              "{\"nodeId\":\"%X%X%X\",\"firefly\":{\"fireflyID\":\"%X%X%X%X\",\"status\":\"%X\",\"bat\":%d,\"temp\":%d,\"timer\":%d}}",
               mac[0],mac[1],mac[2], // nodeid
               rx_packet[0],rx_packet[1],rx_packet[2],rx_packet[3], // fireflyid
               rx_packet[4], // status
               (uint16_t)rx_packet[5]+((uint16_t)rx_packet[6]<<8), // bat
               rx_packet[7], // temp
-              (uint16_t)rx_packet[8]+((uint16_t)rx_packet[9]<<8)); // wdt
+              rx_packet[8]); // wdt
 
     g_radio_nrf.stopListening();
     if(!g_radio_nrf.write(mac,6,true)){
