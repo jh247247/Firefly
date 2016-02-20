@@ -32,9 +32,6 @@
 #include <RF24.h>
 #include "ESPmDNS.h"
 
-#define FAKE_FF_ID 1234
-#define FAKE_FF_BATTERY 7
-
 // magics.
 #define PRINT_HEX(h,l) {int d_i; Serial.print(h[l-1],HEX);for(d_i = l-2; d_i >= 0; d_i--){Serial.print(":");Serial.print(h[d_i],HEX);}}
 #define WAIT_FOR_PACKET(r,t,to) {int d_start = micros(); while(!r.available()){if(micros() - d_start > t*1000){to=true;break;}}}
@@ -48,9 +45,10 @@ void recvFakePacket();
 
 // nrf globals
 RF24 g_radio_nrf(16, 15);
-byte address[6] = {0xe7, 0xe7, 0xe7, 0xe7, 0xe7};
-byte mac[6];
-byte rx_packet[6];
+byte rx_address[6] = {0x78, 0x70, 0x24, 0x72, 0x74};
+byte tx_address[6] = {0x70, 0x70, 0x24, 0x72, 0x74};
+byte mac[32];
+byte rx_packet[9];
 
 // Update these with values suitable for your network.
 const char* ssid = "linksys";
@@ -64,10 +62,7 @@ ESPmDNS espmDNS;
 IPAddress monIp = INADDR_NONE;
 
 // MQTT globals
-char msg[50];
-int value = 0;
-
-
+char msg[128];
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
@@ -81,8 +76,8 @@ void setup() {
   g_radio_nrf.setAutoAck(false);
   g_radio_nrf.setPayloadSize(32); // we want to send the mac address so we can confirm.
 
-  g_radio_nrf.openWritingPipe(address);
-  g_radio_nrf.openReadingPipe(0, address);
+  g_radio_nrf.openWritingPipe(tx_address);
+  g_radio_nrf.openReadingPipe(1, rx_address); // use pipe 1 instead of pipe 0 to ensure rx addr is not overwritten
 
   g_radio_nrf.startListening();
 
@@ -175,51 +170,56 @@ void reconnect() {
 
 void loop() {
   bool timeout = false;
-  uint8_t packetrec = 0;
 
 
-  g_radio_nrf.stopListening();
 
-  if(!g_radio_nrf.write(mac,6,true)){
-    Serial.print("Sending ");
-    PRINT_HEX(mac,sizeof(mac));
-    Serial.println(" via NRF radio failed!");
-  }
 
-  g_radio_nrf.startListening();
-  delay(200);
-  WAIT_FOR_PACKET(g_radio_nrf,500,timeout);
-  if (g_radio_nrf.available()) {
+
+  WAIT_FOR_PACKET(g_radio_nrf,1000,timeout);
+  if (!timeout) {
     Serial.print("Packet received: -");
     g_radio_nrf.read(rx_packet, sizeof(rx_packet));
+
+
+
     PRINT_HEX(rx_packet,sizeof(rx_packet));
     Serial.print(" @ ");
     Serial.println(millis());
-    packetrec = 1;
-  } else if (value % 5 == 0) {
-    Serial.println("Fake packet received!");
-    recvFakePacket();
+
+
+    snprintf (msg, 128,
+              "{\"nodeId\":\"%X%X%X\", \"fireflyID\":\"%X%X%X%X\",\"status\":\"%X\",\"bat\":%d,\"temp\":%d,\"timer\":%d}",
+              mac[0],mac[1],mac[2], // nodeid
+              rx_packet[0],rx_packet[1],rx_packet[2],rx_packet[3], // fireflyid
+              rx_packet[4], // temp
+              (uint16_t)rx_packet[5]+((uint16_t)rx_packet[6]<<8), // bat
+              rx_packet[7], // temp
+              (uint16_t)rx_packet[8]+((uint16_t)rx_packet[9]<<8)); // wdt
+
+    g_radio_nrf.stopListening();
+    if(!g_radio_nrf.write(mac,6,true)){
+      Serial.print("Sending ");
+      PRINT_HEX(mac,sizeof(mac));
+      Serial.println(" via NRF radio failed!");
+    }
+    g_radio_nrf.startListening();
   } else {
+    // just send heartbeat
+    snprintf (msg, 128, "{\"nodeId\":\"%X%X%X\"}", mac[0],mac[1],mac[2]);
     Serial.println("No packet received!");
   }
+
+
 
   if (!client.connected()) {
     reconnect();
   }
   client.loop();
 
-  ++value;
-  snprintf (msg, 75, "{\"nodeId\":\"%X%X%X\",\"val\":%d, \"prec\":%d}", mac[0],mac[1],mac[2],value,packetrec);
+
   Serial.print("Publish message with node data: ");
   Serial.println(msg);
   client.publish("node", msg);
 
   delay(500);
-}
-
-void recvFakePacket() {
-  snprintf (msg, 75, "{\"fireflyId\":\"%d\",\"bat\":%d}", FAKE_FF_ID, FAKE_FF_BATTERY);
-  Serial.print("Publish message with firefly data: ");
-  Serial.println(msg);
-  client.publish("firefly", msg);
 }
