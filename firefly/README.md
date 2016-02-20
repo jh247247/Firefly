@@ -16,7 +16,8 @@
      - This is integrated into the chip, why not include it?
      - May be used to determine area of very high/low temps?
      - Would be cool to make a temperature map of building maybe...
-   - Current watchdog timeout (2 bytes)
+   - Current watchdog timeout (1 byte)
+     - 1 count of this is 250ms
 
 ** Incoming
    Immediately after sending the previous packet, the firefly listens
@@ -33,4 +34,4 @@
        - Note that if the led is flashing, pressing the button will
          turn it off as well.
    - New watchdog timer value
-     - If keeping the same watchdog value, set to 0xFFFF in node code
+     - If keeping the same watchdog value, set to 0x00 in node code
