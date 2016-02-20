@@ -7,6 +7,7 @@ import time
 # TODO: proper logging
 
 DECODE_SCHEME = "utf-8"
+TIMESTAMP_DIFF = 5
 
 # might not be the best to keep these as magic strings, but idk
 nodes = MongoClient()['redo']['node']
@@ -46,36 +47,42 @@ def updateNode(nodeDict):
         current['fireflies'] = []
 
     if nodeDict.get('firefly') is not None:
-        updateFirefly(nodeDict)
-        # see if current firefly exists in list
-        f = next(((i,v) for i,v in enumerate(current.get('fireflies')) \
-                  if v == nodeDict['firefly']['fireflyID']),None)
-        if f is None:
-            currFire = nodeDict['firefly']['fireflyID']
-            current['fireflies'].insert(0,currFire)
+        f = updateFirefly(nodeDict)
+        if f['nodeId'] == nodeDict['nodeId'] and f['fireflyID'] not in current['fireflies']:
+            current['fireflies'].append(f['fireflyID'])
 
+    current['timestamp'] = nodeDict['timestamp']
     nodes.update_one({'nodeId':current.get('nodeId')},{'$set':current},upsert=True)
+
 
 
 def updateFirefly(nodeDict):
     current = fireflies.find_one({"fireflyID" : nodeDict['firefly']['fireflyID']},{'_id' : False})
-    if current is None:
-        # does not exist yet, create from this
-        current = nodeDict['firefly']
-    else:
+    update = nodeDict['firefly']
+
+
+    if current is not None:
         # we already exist, remove us from previous node
         # fireflies should only be associated with a single node at a time.
-        if current['nodeId'] != nodeDict['nodeId']:
-            nodes.update({'nodeId' : current['nodeId']},
-                         {'$pull': {'fireflies' : nodeDict['firefly']['fireflyID']}})
+        # TODO: take into account power levels
+        if abs(nodeDict['timestamp']-current['timestamp']) > TIMESTAMP_DIFF:
+            if current['nodeId'] != nodeDict['nodeId']:
 
-    # TODO: check power of transmit levels? don't update if updated in last 5 seconds and has lower power level?
+                nodes.update({'nodeId' : current['nodeId']},
+                             {'$pull': {'fireflies' : nodeDict['firefly']['fireflyID']}})
+            update['nodeId'] = nodeDict['nodeId']
+        else:
+            update['nodeId'] = current['nodeId']
+    else:
+        # no previous data, set to what we have
+        update['nodeId'] = nodeDict['nodeId']
 
-    # copy over node we are hearing from
-    current['nodeId'] = nodeDict['nodeId']
-    current['timestamp'] = nodeDict['timestamp']
+    # update time of being last seen
+    update['timestamp'] = nodeDict['timestamp']
 
-    fireflies.update_one({'fireflyId':current.get('fireflyID')},{'$set':current},upsert=True)
+    fireflies.update_one({'fireflyId':update.get('fireflyID')},{'$set':update},upsert=True)
+    return update # return updated entry
+
 
 client = mqtt.Client()
 client.on_connect = on_connect
