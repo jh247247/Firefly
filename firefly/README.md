@@ -8,6 +8,7 @@
    - Status byte
      - Bit 0: if button has been pressed this iteration
        - Enables fireflies to be used as remote?
+     - Bit 1-3: Power of transmit, try to mirror this on the node.
    - Current battery life (unsigned 2 byte)
      - Note that this is VREF being measured, so it may have some
        fluctuation from one device to another.
@@ -20,8 +21,8 @@
 ** Incoming
    Immediately after sending the previous packet, the firefly listens
    for a packet formatted as follows:
-   - Node unique ID/MAC addr (6 bytes)
-     - Note that this is not used as of yet on the firefly
+   - Firefly unique ID (4 bytes)
+     - used so only the sending firefly will respond
    - LED action byte (1 byte)
      - Bit 7-5 Red bit color value
      - Bit 4-2 Green bit color value
