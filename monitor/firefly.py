@@ -29,7 +29,7 @@ class firefly_res(fr.Resource):
 
 class fireflylist_res(fr.Resource):
     def get(self):
-        return {'fireflyIds':firefly.distinct('fireflyId')}
+        return {'fireflyIds':fireflies.distinct('fireflyId')}
 
 
 def setup(api):
