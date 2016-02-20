@@ -3,16 +3,21 @@
 #include <delay.h>
 
 #define PREAMBLE_BITS 4
-#define DATA_BITS 8
-#define DELAY_TICKS 2000
+#define DATA_BITS 16
+#define DELAY_TICKS 500
 #define LED_OVERHEAD 100
 
 #define RED_ENABLE
 #define GREEN_ENABLE
 //#define BLUE_ENABLE
 
+#define RED_DATA s[0]
+#define GREEN_DATA s[1]
+//#define BLUE_DATA
+
 typedef union {
   uint32_t i;
+  uint16_t s[2];
   uint8_t b[4];
 } UID_Bytes;
 
@@ -47,6 +52,7 @@ void UID_preamble() {
 
 }
 
+/* TODO: Have this function nonblocking? */
 void UID_flash() {
   UID_Bytes id;
   id.i = UID_get();
@@ -57,7 +63,7 @@ void UID_flash() {
   UID_preamble();
   for(int i = 0; i < DATA_BITS; i++) {
 #ifdef RED_ENABLE
-    if(id.b[0]&(1<<i)) {
+    if(id.RED_DATA&(1<<i)) {
       LED_ON(RED);
     } else {
       LED_OFF(RED);
@@ -65,7 +71,7 @@ void UID_flash() {
 #endif // RED_ENABLE
 
 #ifdef GREEN_ENABLE
-    if(id.b[1]&(1<<i)) {
+    if(id.GREEN_DATA&(1<<i)) {
       LED_ON(GREEN);
     } else {
       LED_OFF(GREEN);

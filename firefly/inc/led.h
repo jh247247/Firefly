@@ -4,7 +4,8 @@
 
 typedef enum {RED = 0, GREEN, BLUE, ALL, NONE} LedColor;
 
-#define LED_FULL_BRIGHTNESS 255
+/* TODO: Make different color values for different leds */
+#define LED_FULL_BRIGHTNESS 8
 
 #define LED_PORT GPIOA
 
