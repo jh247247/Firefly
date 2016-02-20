@@ -67,23 +67,20 @@ int main(void) {
   char iter = 100;
   uint8_t buf[32];
 
+  chip_init();
+
   uint32_t* uid = (uint32_t*)buf;
   *uid = UID_get();
-  buf[4] = !SWITCH_READ | ((resetCount&0x03)<<2); /* TODO: add more to this byte */
+  buf[4] = SWITCH_READ | ((resetCount&0x03)<<2); /* TODO: add more to this byte */
   buf[5] = 0; /* TODO: read battery life */
   buf[6] = 0; /* TODO: read battery life */
   buf[7] = 0; /* TODO: read temperature */
 
   // wait until reload value flag is reset, then reload value can be read.
   while(IWDG->SR&IWDG_FLAG_RVU) __asm__("");
-  buf[8] = IWDG->RLR;
-  buf[9] = ((IWDG->RLR&0x700)>>8);
+  buf[8] = IWDG->RLR&0xFF;
+  buf[9] = 0|((IWDG->RLR&0xF00)>>8);
 
-  /* TODO: Load up send buffer with data we actually want to send... */
-
-  chip_init();
-
-  NRF_printStatus();
 
   if(NRF_write(buf,10)) {
     SERIAL_putString("WRITE FAIL!\n");
