@@ -4,7 +4,9 @@
       android:versionCode="1"
       android:versionName="1.0">
     <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+    <application android:label="@string/app_name"
+		 android:icon="@drawable/ic_launcher"
+		 android:theme="@style/redoTheme">
         <activity android:name="MainActivity"
                   android:label="@string/app_name">
             <intent-filter>
