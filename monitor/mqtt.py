@@ -2,6 +2,7 @@
 from pymongo import MongoClient
 import json
 import paho.mqtt.client as mqtt
+import time
 
 # TODO: proper logging
 
@@ -14,7 +15,6 @@ fireflies = MongoClient()['redo']['firefly']
 def on_connect(client, userdata, flags, rc):
     print("MQTT Connected with result: " + str(rc))
     client.subscribe("node")
-    client.subscribe("firefly")
 
 def on_message(client, userdata, msg):
     print("MQTT: received message: " +
@@ -29,21 +29,55 @@ def on_message(client, userdata, msg):
     # TODO: Add authentication before db insertian
     if str(msg.topic) == "node":
         if data is not None and data.get('nodeId') is not None:
-            print("MQTT: inserting decoded json into node database: " + str(data))
-            nodes.update_one({'nodeId':data.get('nodeId')},{'$set':data},upsert=True)
-
-    elif str(msg.topic) == "firefly":
-        if data is not None and data.get('fireflyId') is not None:
-            print("MQTT: inserting decoded json into firefly database: " + str(data))
-            fireflies.update_one({'fireflyId':data.get('fireflyId')},{'$set':data},upsert=True)
+            data['timestamp'] = int(time.time())
+            updateNode(data)
 
 
+
+def updateNode(nodeDict):
+    current = nodes.find_one({"nodeId" : nodeDict.get("nodeId")},{'_id' : False})
+
+    # does not exist yet...
+    if current is None:
+        current = {i:nodeDict[i] for i in nodeDict if i!='firefly'}
+
+    # Oh, no fireflies registered? make a blank list.
+    if current.get('fireflies') is None:
+        current['fireflies'] = []
+
+    if nodeDict.get('firefly') is not None:
+        updateFirefly(nodeDict)
+        # see if current firefly exists in list
+        f = next(((i,v) for i,v in enumerate(current.get('fireflies')) if v['fireflyID'] == nodeDict['firefly']['fireflyID']),None)
+        if f is not None:
+            # matched a previous id
+            current['fireflies'][f[0]] = nodeDict.get('firefly')
+            current['fireflies'][f[0]]['timestamp'] = int(time.time())
+        else:
+            currFire = nodeDict.get('firefly')
+            currFire['timestamp'] = nodeDict.get('timestamp')
+            current['fireflies'].insert(0,currFire)
+
+    nodes.update_one({'nodeId':current.get('nodeId')},{'$set':current},upsert=True)
+
+
+def updateFirefly(nodeDict):
+    current = fireflies.find_one({"fireflyID" : nodeDict['firefly']['fireflyID']},{'_id' : False})
+    if current is None:
+        # does not exist yet, create from this
+        current = nodeDict['firefly']
+    # TODO: check power of transmit levels? don't update if updated in last 5 seconds and has lower power level?
+
+    # copy over node we are hearing from
+    current['nodeId'] = nodeDict['nodeId']
+    current['timestamp'] = nodeDict['timestamp']
+
+    fireflies.update_one({'fireflyId':current.get('fireflyID')},{'$set':current},upsert=True)
 
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect("localhost",1883,60)
-
 def run():
+    client.connect("localhost",1883,60)
     client.loop_forever()
