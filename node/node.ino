@@ -71,8 +71,7 @@ void setup() {
   g_radio_nrf.begin();
   g_radio_nrf.printDetails();
 
-
-  g_radio_nrf.setPALevel(RF24_PA_MIN);
+  g_radio_nrf.setPALevel(RF24_PA_MAX);
   g_radio_nrf.setAutoAck(false);
   g_radio_nrf.setPayloadSize(32); // we want to send the mac address so we can confirm.
 
@@ -140,7 +139,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   } else {
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
-
 }
 
 void reconnect() {
@@ -171,27 +169,20 @@ void reconnect() {
 void loop() {
   bool timeout = false;
 
-
-
-
-
   WAIT_FOR_PACKET(g_radio_nrf,1000,timeout);
   if (!timeout) {
     Serial.print("Packet received: -");
     g_radio_nrf.read(rx_packet, sizeof(rx_packet));
 
-
-
     PRINT_HEX(rx_packet,sizeof(rx_packet));
     Serial.print(" @ ");
     Serial.println(millis());
-
 
     snprintf (msg, 128,
               "{\"nodeId\":\"%X%X%X\", \"fireflyID\":\"%X%X%X%X\",\"status\":\"%X\",\"bat\":%d,\"temp\":%d,\"timer\":%d}",
               mac[0],mac[1],mac[2], // nodeid
               rx_packet[0],rx_packet[1],rx_packet[2],rx_packet[3], // fireflyid
-              rx_packet[4], // temp
+              rx_packet[4], // status
               (uint16_t)rx_packet[5]+((uint16_t)rx_packet[6]<<8), // bat
               rx_packet[7], // temp
               (uint16_t)rx_packet[8]+((uint16_t)rx_packet[9]<<8)); // wdt
