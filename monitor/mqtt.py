@@ -48,14 +48,11 @@ def updateNode(nodeDict):
     if nodeDict.get('firefly') is not None:
         updateFirefly(nodeDict)
         # see if current firefly exists in list
-        f = next(((i,v) for i,v in enumerate(current.get('fireflies')) if v['fireflyID'] == nodeDict['firefly']['fireflyID']),None)
-        if f is not None:
-            # matched a previous id
-            current['fireflies'][f[0]] = nodeDict.get('firefly')
-            current['fireflies'][f[0]]['timestamp'] = int(time.time())
-        else:
-            currFire = nodeDict.get('firefly')
-            currFire['timestamp'] = nodeDict.get('timestamp')
+        f = next(((i,v) for i,v in enumerate(current.get('fireflies')) \
+                  if v == nodeDict['firefly']['fireflyID']),None)
+        print(f)
+        if f is None:
+            currFire = nodeDict['firefly']['fireflyID']
             current['fireflies'].insert(0,currFire)
 
     nodes.update_one({'nodeId':current.get('nodeId')},{'$set':current},upsert=True)
