@@ -65,14 +65,14 @@ def updateFirefly(nodeDict):
         # we already exist, remove us from previous node
         # fireflies should only be associated with a single node at a time.
         # TODO: take into account power levels
-        if abs(nodeDict['timestamp']-current['timestamp']) > TIMESTAMP_DIFF:
-            if current['nodeId'] != nodeDict['nodeId']:
-
+        update['nodeId'] = current['nodeId']
+        if current['nodeId'] != nodeDict['nodeId']:
+            if abs(nodeDict['timestamp']-current['timestamp']) > TIMESTAMP_DIFF:
                 nodes.update({'nodeId' : current['nodeId']},
                              {'$pull': {'fireflies' : nodeDict['firefly']['fireflyID']}})
-            update['nodeId'] = nodeDict['nodeId']
-        else:
-            update['nodeId'] = current['nodeId']
+                update['nodeId'] = nodeDict['nodeId']
+            else:
+                return update
     else:
         # no previous data, set to what we have
         update['nodeId'] = nodeDict['nodeId']
