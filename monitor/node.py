@@ -45,7 +45,7 @@ relatively clean.
 """
 class nodelist_res(fr.Resource):
     def get(self):
-        return {'nodeIds':nodes.distinct('nodeId')}
+        return {'ids':nodes.distinct('nodeId')}
 
 
 """
