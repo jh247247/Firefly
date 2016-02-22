@@ -134,63 +134,84 @@ public class MainActivity extends Activity {
 
     }
 
-    // update a list based on a list of ids
-    private class RetrofitListUpdater<T extends IdList,S extends Fragment> implements Callback<T> {
-        private Class<S> fragmentMaker;
-        @Override
-        public void onResponse(Response<T> resp, Retrofit retro) {
-            List<String> l = resp.body().ids;
-
-            FragmentManager fm = getFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-
-            // Make a fragment that monitors that node id
-            for(String id : l) {
-
-                // make sure we don't already have the fragment inflated
-                DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(id);
-                if(df != null) {
-                    // fragment already exists, try to update contents
-                    df.requestUpdate();
-                } else {
-                    // make a new fragment...
-                    Bundle b = new Bundle();
-                    b.putString(DiscoveryFragment.NODE_ID, id);
-                    try {
-                        S f = fragmentMaker.newInstance();
-                        f.setArguments(b);
-                        ft.add(R.id.mainLayout, f, id);
-
-                    }
-                    catch (Throwable e) {
-                        System.out.println("Error " + e.getMessage());
-                        e.printStackTrace();
-                    }
-
-
-                }
-
-                // TODO: handle if node dissapears...
-            }
-            ft.commit();
-        }
-
-        @Override
-        public void onFailure(Throwable t) {
-            m_mainText.setText("Failure!");
-        }
-    }
-
     private void setupNodeAttrList() {
         // get node attrs from retained fragment
         RediscoverService service = m_retained.getServiceApi();
         if(service == null) return; // TODO: log
 
-        Call<NodeList> call = service.nodeIds();
-        call.enqueue(new RetrofitListUpdater<NodeList,DiscoveryFragment>());
+	Call<NodeList> call = service.nodeIds();
+        call.enqueue(new Callback<NodeList>() {
+                @Override
+                public void onResponse(Response<NodeList> resp, Retrofit retro) {
+                    List<String> nodeList = resp.body().ids;
+
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+
+                    // Make a fragment that monitors that node id
+                    for(String id : nodeList) {
+                        Bundle b = new Bundle();
+                        b.putString(DiscoveryFragment.NODE_ID, id);
+
+                        // make sure we don't already have the fragment inflated
+                        DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(id);
+                        if(df != null) {
+                            // fragment already exists, try to update contents
+                            df.requestUpdate();
+                        } else {
+                            // make a new fragment...
+                            DiscoveryFragment f = new DiscoveryFragment();
+                            f.setArguments(b);
+                            ft.add(R.id.mainLayout, f, id);
+                        }
+
+                        // TODO: handle if node dissapears...
+                    }
+                    ft.commit();
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    m_mainText.setText("Failure!");
+                }
+            });
 
         Call<FireflyList> callFirefly = service.fireflyIds();
-        callFirefly.enqueue(new RetrofitListUpdater<FireflyList,DiscoveryFragmentFirefly>());
+        callFirefly.enqueue(new Callback<FireflyList>() {
+            @Override
+            public void onResponse(Response<FireflyList> resp, Retrofit retro) {
+                List<String> fireflyList = resp.body().ids;
+
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+
+                // Make a fragment that monitors that node id
+                for(String id : fireflyList) {
+                    Bundle b = new Bundle();
+                    b.putString(DiscoveryFragment.NODE_ID, id);
+
+                    // make sure we don't already have the fragment inflated
+                    DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(id);
+                    if(df != null) {
+                        // fragment already exists, try to update contents
+                        df.requestUpdate();
+                    } else {
+                        // make a new fragment...
+                        DiscoveryFragmentFirefly f = new DiscoveryFragmentFirefly();
+                        f.setArguments(b);
+                        ft.add(R.id.mainLayout, f, id);
+                    }
+
+                    // TODO: handle if node dissapears...
+                }
+                ft.commit();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                m_mainText.setText("Failure!");
+            }
+        });
     }
 
     // update a node that sends it's id along the eventbus with the proper encapsulation.
