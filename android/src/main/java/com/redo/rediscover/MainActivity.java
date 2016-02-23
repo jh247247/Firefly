@@ -1,8 +1,11 @@
 package com.redo.rediscover;
 
-import android.app.Activity;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.net.nsd.NsdServiceInfo;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,7 +37,7 @@ import com.redo.rediscover.network.Firefly;
 import com.redo.rediscover.network.FireflyList;
 import com.redo.rediscover.network.IdList;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
 
     // move this to a retained fragment at some point.
@@ -48,6 +51,11 @@ public class MainActivity extends Activity {
 
     @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
     @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
+
+    //    @Bind(R.id.main_toolbar) Toolbar m_toolbar;
+    //@Bind(R.id.main_viewpager) ViewPager m_viewPager;
+    //    @Bind(R.id.main_tablayout) TabLayout m_tabLayout;
+
     // remove later
 
     // UI update handler
@@ -89,7 +97,7 @@ public class MainActivity extends Activity {
                     m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
                 }
             },UI_UPDATE_TIMEOUT);
-        setupNodeAttrList();
+        //setupNodeAttrList();
     }
 
     @Override
@@ -172,7 +180,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    m_mainText.setText("Failure!");
+                    m_mainText.setText("Failure: " + t);
                 }
             });
 
@@ -209,8 +217,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onFailure(Throwable t) {
-                m_mainText.setText("Failure!");
-            }
+		m_mainText.setText("Failure: " + t);
+	    }
         });
     }
 
