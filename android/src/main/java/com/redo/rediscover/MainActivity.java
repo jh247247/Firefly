@@ -36,6 +36,8 @@ import com.redo.rediscover.network.NodeList;
 import com.redo.rediscover.network.Firefly;
 import com.redo.rediscover.network.FireflyList;
 import com.redo.rediscover.network.IdList;
+import com.redo.rediscover.model.Monitor;
+import com.redo.rediscover.model.MonitorPoll;
 
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
@@ -52,14 +54,6 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
     @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
 
-    //    @Bind(R.id.main_toolbar) Toolbar m_toolbar;
-    //@Bind(R.id.main_viewpager) ViewPager m_viewPager;
-    //    @Bind(R.id.main_tablayout) TabLayout m_tabLayout;
-
-    // remove later
-
-    // UI update handler
-    Handler m_uiHandler = new Handler();
     private static int UI_UPDATE_TIMEOUT = 5000;
 
     /** Called when the activity is first created. */
@@ -71,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main);
         ButterKnife.bind(this);
         setupRetainedFragment();
-        if(m_retained.getServiceApi() == null){
+        if(!Monitor.serviceApiExists()){
             // setup network discovery.
             m_nsdHelper = new NsdHelper(this,m_serviceCallback);
             m_nsdHelper.startDiscovery();
@@ -82,22 +76,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        m_uiHandler.removeCallbacksAndMessages(null);
+	MonitorPoll.stop();
     }
 
 
     @Override
     public void onResume() {
         super.onResume();
-        // update the list every UI_UPDATE_TIMEOUT ms, ugly pls fix
-        m_uiHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    setupNodeAttrList();
-                    m_uiHandler.postDelayed(this,UI_UPDATE_TIMEOUT);
-                }
-            },UI_UPDATE_TIMEOUT);
-        //setupNodeAttrList();
+	MonitorPoll.start();
     }
 
     @Override
@@ -112,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceResolved(NsdServiceInfo n) {
             m_nsdHelper.stopDiscovery(); // tell the helper to stop
             // listening, we already found the service.
-            m_retained.setServiceInfo(n);
+	    Monitor.setLocation(n.getHost(),n.getPort());
             setupNodeAttrList();
         }
 
@@ -143,88 +129,91 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupNodeAttrList() {
-        // get node attrs from retained fragment
-        RediscoverService service = m_retained.getServiceApi();
-        if(service == null) return; // TODO: log
+	Bundle b = new Bundle();
 
-	Call<NodeList> call = service.nodeIds();
-        call.enqueue(new Callback<NodeList>() {
-                @Override
-                public void onResponse(Response<NodeList> resp, Retrofit retro) {
-                    List<String> nodeList = resp.body().ids;
 
-                    FragmentManager fm = getFragmentManager();
-                    FragmentTransaction ft = fm.beginTransaction();
+        // // get node attrs from retained fragment
+        // RediscoverService service = m_retained.getServiceApi();
+        // if(service == null) return; // TODO: log
 
-                    // Make a fragment that monitors that node id
-                    for(String id : nodeList) {
-                        Bundle b = new Bundle();
-                        b.putString(DiscoveryFragment.NODE_ID, id);
+	// Call<NodeList> call = service.nodeIds();
+        // call.enqueue(new Callback<NodeList>() {
+        //         @Override
+        //         public void onResponse(Response<NodeList> resp, Retrofit retro) {
+        //             List<String> nodeList = resp.body().ids;
 
-                        // make sure we don't already have the fragment inflated
-                        DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(id);
-                        if(df != null) {
-                            // fragment already exists, try to update contents
-                            df.requestUpdate();
-                        } else {
-                            // make a new fragment...
-                            DiscoveryFragment f = new DiscoveryFragment();
-                            f.setArguments(b);
-                            ft.add(R.id.mainLayout, f, id);
-                        }
+        //             FragmentManager fm = getFragmentManager();
+        //             FragmentTransaction ft = fm.beginTransaction();
 
-                        // TODO: handle if node dissapears...
-                    }
-                    ft.commit();
-                }
+        //             // Make a fragment that monitors that node id
+        //             for(String id : nodeList) {
+        //                 Bundle b = new Bundle();
+        //                 b.putString(DiscoveryFragment.NODE_ID, id);
 
-                @Override
-                public void onFailure(Throwable t) {
-                    m_mainText.setText("Failure: " + t);
-                }
-            });
+        //                 // make sure we don't already have the fragment inflated
+        //                 DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(id);
+        //                 if(df != null) {
+        //                     // fragment already exists, try to update contents
+        //                     df.requestUpdate();
+        //                 } else {
+        //                     // make a new fragment...
+        //                     DiscoveryFragment f = new DiscoveryFragment();
+        //                     f.setArguments(b);
+        //                     ft.add(R.id.mainLayout, f, id);
+        //                 }
 
-        Call<FireflyList> callFirefly = service.fireflyIds();
-        callFirefly.enqueue(new Callback<FireflyList>() {
-            @Override
-            public void onResponse(Response<FireflyList> resp, Retrofit retro) {
-                List<String> fireflyList = resp.body().ids;
+        //                 // TODO: handle if node dissapears...
+        //             }
+        //             ft.commit();
+        //         }
 
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction ft = fm.beginTransaction();
+        //         @Override
+        //         public void onFailure(Throwable t) {
+        //             m_mainText.setText("Failure: " + t);
+        //         }
+        //     });
 
-                // Make a fragment that monitors that node id
-                for(String id : fireflyList) {
-                    Bundle b = new Bundle();
-                    b.putString(DiscoveryFragment.NODE_ID, id);
+        // Call<FireflyList> callFirefly = service.fireflyIds();
+        // callFirefly.enqueue(new Callback<FireflyList>() {
+        //     @Override
+        //     public void onResponse(Response<FireflyList> resp, Retrofit retro) {
+        //         List<String> fireflyList = resp.body().ids;
 
-                    // make sure we don't already have the fragment inflated
-                    DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(id);
-                    if(df != null) {
-                        // fragment already exists, try to update contents
-                        df.requestUpdate();
-                    } else {
-                        // make a new fragment...
-                        DiscoveryFragmentFirefly f = new DiscoveryFragmentFirefly();
-                        f.setArguments(b);
-                        ft.add(R.id.mainLayout, f, id);
-                    }
+        //         FragmentManager fm = getFragmentManager();
+        //         FragmentTransaction ft = fm.beginTransaction();
 
-                    // TODO: handle if node dissapears...
-                }
-                ft.commit();
-            }
+        //         // Make a fragment that monitors that node id
+        //         for(String id : fireflyList) {
+        //             Bundle b = new Bundle();
+        //             b.putString(DiscoveryFragment.NODE_ID, id);
 
-            @Override
-            public void onFailure(Throwable t) {
-		m_mainText.setText("Failure: " + t);
-	    }
-        });
+        //             // make sure we don't already have the fragment inflated
+        //             DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(id);
+        //             if(df != null) {
+        //                 // fragment already exists, try to update contents
+        //                 df.requestUpdate();
+        //             } else {
+        //                 // make a new fragment...
+        //                 DiscoveryFragmentFirefly f = new DiscoveryFragmentFirefly();
+        //                 f.setArguments(b);
+        //                 ft.add(R.id.mainLayout, f, id);
+        //             }
+
+        //             // TODO: handle if node dissapears...
+        //         }
+        //         ft.commit();
+        //     }
+
+        //     @Override
+        //     public void onFailure(Throwable t) {
+	// 	m_mainText.setText("Failure: " + t);
+	//     }
+        // });
     }
 
     // update a node that sends it's id along the eventbus with the proper encapsulation.
     public void onEvent(final DiscoveryFragment.RequestNodeIdUpdateEvent e) {
-        RediscoverService s = m_retained.getServiceApi();
+        RediscoverService s = Monitor.getServiceApi();
         Call<Node> call = s.nodeDetails(e.id);
         call.enqueue(new Callback<Node>() {
                 @Override
@@ -246,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onEvent(final DiscoveryFragmentFirefly.RequestFireflyIdUpdateEvent e) {
-        RediscoverService s = m_retained.getServiceApi();
+        RediscoverService s = Monitor.getServiceApi();
         Call<Firefly> call = s.fireflyDetails(e.id);
         call.enqueue(new Callback<Firefly>() {
                 @Override

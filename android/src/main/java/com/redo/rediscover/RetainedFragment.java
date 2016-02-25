@@ -10,7 +10,7 @@ import android.net.nsd.NsdServiceInfo;
 import com.redo.rediscover.network.RediscoverService;
 
 import retrofit.Retrofit;
-import retrofit.GsonConverterFactory;
+
 
 
 /**
@@ -22,9 +22,6 @@ import retrofit.GsonConverterFactory;
 public class RetainedFragment extends Fragment {
     public static String TAG = "RetainedFragment";
 
-    // when a service is resolved, set it here.
-    private NsdServiceInfo m_serviceInfo;
-    private RediscoverService m_rediscoverService;
 
     public RetainedFragment() {
 
@@ -34,25 +31,5 @@ public class RetainedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-    }
-
-    public void setServiceInfo(NsdServiceInfo n) {
-        m_serviceInfo = n;
-
-        InetAddress ip = n.getHost();
-        int port = n.getPort();
-        String url = "http:/" + ip + ":" + port;
-        Log.d(TAG, "Fully resolved URL: " + url);
-
-        Retrofit r = new Retrofit.Builder()
-                .baseUrl(url)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        m_rediscoverService =
-                r.create(RediscoverService.class);
-    }
-
-    public RediscoverService getServiceApi() {
-        return m_rediscoverService;
     }
 }
