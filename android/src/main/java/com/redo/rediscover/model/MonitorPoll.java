@@ -35,11 +35,15 @@ public class MonitorPoll {
                 List<String> flist;
                 try {
                     flist = resp.body().ids;
+                    // post list to eventbus so the ui can be updated
+                    EventBus.getDefault().post(new FireflyListLoadedEvent(resp.body()));
                 }
                 catch(Exception e) {
                     Log.e(TAG, "Failed parsing firefly list: " + e);
                     return;
                 }
+
+
 
                 for(String id : flist) {
                     Monitor.getServiceApi().fireflyDetails(id).enqueue(m_fireflyIdCallback);
@@ -58,11 +62,16 @@ public class MonitorPoll {
                 List<String> nlist;
                 try {
                     nlist = resp.body().ids;
+
+                    // post list to eventbus so the ui can be updated
+                    EventBus.getDefault().post(new NodeListLoadedEvent(resp.body()));
                 }
                 catch(Exception e) {
                     Log.e(TAG, "Failed parsing node list: " + e);
                     return;
                 }
+
+
 
                 for(String id : nlist) {
                     Monitor.getServiceApi().nodeDetails(id).enqueue(m_nodeIdCallback);
@@ -101,7 +110,7 @@ public class MonitorPoll {
             public void onResponse(Response<Firefly> resp, Retrofit r) {
                 try {
                     Log.d(TAG, "Loaded data of firefly  " + resp.body().nodeId);
-                    EventBus.getDefault().post(new NodeDataLoadedEvent(resp.body()));
+                    EventBus.getDefault().post(new FireflyDataLoadedEvent(resp.body()));
                 }
                 catch (Exception e) {
                     Log.e(TAG, "Failed parsing node data: " + e);
@@ -173,6 +182,21 @@ public class MonitorPoll {
         m_handler.removeCallbacksAndMessages(null);
     }
 
+    public static class NodeListLoadedEvent {
+        public NodeList list;
+        public NodeListLoadedEvent(NodeList n) {
+            list = n;
+        }
+    }
+
+    public static class FireflyListLoadedEvent {
+        public FireflyList list;
+        public FireflyListLoadedEvent(FireflyList n) {
+            list = n;
+        }
+    }
+
+
     public static class FireflyDataLoadedEvent {
         public String id;
         public Firefly data;
@@ -186,7 +210,7 @@ public class MonitorPoll {
         public String id;
         public Node data;
         public NodeDataLoadedEvent(Node n) {
-            id = n.fireflyId;
+            id = n.nodeId;
             data = n;
         }
     }

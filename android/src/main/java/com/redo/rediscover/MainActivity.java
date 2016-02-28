@@ -9,10 +9,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.os.Handler;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import com.redo.rediscover.ui.FireflyListPresenter;
 
 import java.util.List;
 
@@ -51,17 +52,15 @@ public class MainActivity extends AppCompatActivity {
     private JSONObject m_nodesJson;
     private String m_monitorUrl;
 
-    @Bind(R.id.mainLayout) LinearLayout m_mainLayout;
-    @Bind(R.id.mainText) TextView m_mainText; // FIXME: Placeholder,
-
-    private static int UI_UPDATE_TIMEOUT = 5000;
+    // use the layout to add things around the viewpager (may need work)
+    @Bind(R.id.main_layout) LinearLayout m_mainLayout;
+    @Bind(R.id.main_pager) ViewPager m_mainPager;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        EventBus.getDefault().register(this);
         setContentView(R.layout.main);
         ButterKnife.bind(this);
         setupRetainedFragment();
@@ -70,6 +69,15 @@ public class MainActivity extends AppCompatActivity {
             m_nsdHelper = new NsdHelper(this,m_serviceCallback);
             m_nsdHelper.startDiscovery();
         }
+
+	setupUi();
+    }
+
+    public void setupUi() {
+	FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+	Fragment fl = (Fragment)(new FireflyListPresenter());
+	ft.add(R.id.main_layout,fl);
+	ft.commit();
 
     }
 
@@ -99,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
             m_nsdHelper.stopDiscovery(); // tell the helper to stop
             // listening, we already found the service.
 	    Monitor.setLocation(n.getHost(),n.getPort());
-            setupNodeAttrList();
         }
 
         @Override
@@ -109,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupRetainedFragment() {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
 
         // get back retained vars if required
         m_retained = (RetainedFragment)
@@ -126,133 +133,5 @@ public class MainActivity extends AppCompatActivity {
         // TODO: get retained instances of our variables...
         // TODO: send other retained instances along event bus.
 
-    }
-
-    private void setupNodeAttrList() {
-	Bundle b = new Bundle();
-
-
-        // // get node attrs from retained fragment
-        // RediscoverService service = m_retained.getServiceApi();
-        // if(service == null) return; // TODO: log
-
-	// Call<NodeList> call = service.nodeIds();
-        // call.enqueue(new Callback<NodeList>() {
-        //         @Override
-        //         public void onResponse(Response<NodeList> resp, Retrofit retro) {
-        //             List<String> nodeList = resp.body().ids;
-
-        //             FragmentManager fm = getFragmentManager();
-        //             FragmentTransaction ft = fm.beginTransaction();
-
-        //             // Make a fragment that monitors that node id
-        //             for(String id : nodeList) {
-        //                 Bundle b = new Bundle();
-        //                 b.putString(DiscoveryFragment.NODE_ID, id);
-
-        //                 // make sure we don't already have the fragment inflated
-        //                 DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(id);
-        //                 if(df != null) {
-        //                     // fragment already exists, try to update contents
-        //                     df.requestUpdate();
-        //                 } else {
-        //                     // make a new fragment...
-        //                     DiscoveryFragment f = new DiscoveryFragment();
-        //                     f.setArguments(b);
-        //                     ft.add(R.id.mainLayout, f, id);
-        //                 }
-
-        //                 // TODO: handle if node dissapears...
-        //             }
-        //             ft.commit();
-        //         }
-
-        //         @Override
-        //         public void onFailure(Throwable t) {
-        //             m_mainText.setText("Failure: " + t);
-        //         }
-        //     });
-
-        // Call<FireflyList> callFirefly = service.fireflyIds();
-        // callFirefly.enqueue(new Callback<FireflyList>() {
-        //     @Override
-        //     public void onResponse(Response<FireflyList> resp, Retrofit retro) {
-        //         List<String> fireflyList = resp.body().ids;
-
-        //         FragmentManager fm = getFragmentManager();
-        //         FragmentTransaction ft = fm.beginTransaction();
-
-        //         // Make a fragment that monitors that node id
-        //         for(String id : fireflyList) {
-        //             Bundle b = new Bundle();
-        //             b.putString(DiscoveryFragment.NODE_ID, id);
-
-        //             // make sure we don't already have the fragment inflated
-        //             DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(id);
-        //             if(df != null) {
-        //                 // fragment already exists, try to update contents
-        //                 df.requestUpdate();
-        //             } else {
-        //                 // make a new fragment...
-        //                 DiscoveryFragmentFirefly f = new DiscoveryFragmentFirefly();
-        //                 f.setArguments(b);
-        //                 ft.add(R.id.mainLayout, f, id);
-        //             }
-
-        //             // TODO: handle if node dissapears...
-        //         }
-        //         ft.commit();
-        //     }
-
-        //     @Override
-        //     public void onFailure(Throwable t) {
-	// 	m_mainText.setText("Failure: " + t);
-	//     }
-        // });
-    }
-
-    // update a node that sends it's id along the eventbus with the proper encapsulation.
-    public void onEvent(final DiscoveryFragment.RequestNodeIdUpdateEvent e) {
-        RediscoverService s = Monitor.getServiceApi();
-        Call<Node> call = s.nodeDetails(e.id);
-        call.enqueue(new Callback<Node>() {
-                @Override
-                public void onResponse(Response<Node> resp,
-                                       Retrofit retro) {
-                    Node n = resp.body();
-                    FragmentManager fm = getFragmentManager();
-                    DiscoveryFragment df = (DiscoveryFragment)fm.findFragmentByTag(n.nodeId);
-                    if(df != null) {
-                        df.updateNode(n);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.e(TAG, "Error updating node: " + e.id + " :" + t.toString());
-                }
-            });
-    }
-
-    public void onEvent(final DiscoveryFragmentFirefly.RequestFireflyIdUpdateEvent e) {
-        RediscoverService s = Monitor.getServiceApi();
-        Call<Firefly> call = s.fireflyDetails(e.id);
-        call.enqueue(new Callback<Firefly>() {
-                @Override
-                public void onResponse(Response<Firefly> resp,
-                                       Retrofit retro) {
-                    Firefly f = resp.body();
-                    FragmentManager fm = getFragmentManager();
-                    DiscoveryFragmentFirefly df = (DiscoveryFragmentFirefly)fm.findFragmentByTag(f.fireflyId);
-                    if(df != null) {
-                        df.updateFirefly(f);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    Log.e(TAG,"Error updating Firefly: " + e.id + " :" + t.toString());
-                }
-            });
     }
 }

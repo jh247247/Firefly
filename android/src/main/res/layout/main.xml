@@ -6,24 +6,18 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-  <ScrollView android:layout_marginTop="?android:attr/actionBarSize"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
-    <LinearLayout android:orientation="vertical"
-                  android:layout_width="fill_parent"
-                  android:layout_height="fill_parent"
-                  android:id="@+id/mainLayout">
+  <!-- Ui elements should be added to this -->
+  <LinearLayout android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/main_layout">
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/main_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+  </LinearLayout>
 
-
-      <TextView
-          android:padding="10dp"
-          android:text="TEST"
-          android:id="@+id/mainText"
-          android:layout_width="fill_parent"
-          android:layout_height="wrap_content"/>
-    </LinearLayout>
-  </ScrollView>
 
   <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
