@@ -4,6 +4,7 @@ import json
 from bson import json_util
 from flask import request
 import flask_restful as fr
+import time
 
 nodes = MongoClient()['redo']['node']
 
@@ -28,8 +29,9 @@ class node_res(fr.Resource):
         # need some protection?
 
         # NOTE: will we ever actually put in a new node using the app?
-        dat = {"data" : request.form}
+        dat = {"usrData" : request.form}
         dat["nodeId"] = node_id
+        dat["timestamp"] = int(time.time())
 
         nodes.insert_one(dict(dat))
 
