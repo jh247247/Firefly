@@ -4,6 +4,7 @@ import json
 from bson import json_util
 from flask import request
 import flask_restful as fr
+import time
 
 fireflies = MongoClient()['redo']['firefly']
 
@@ -20,8 +21,9 @@ class firefly_res(fr.Resource):
 
 
     def put(self, firefly_id):
-        dat = {"data" : request.form}
-        dat["fireflyId"] = node_id
+        dat = {"usrData" : request.form}
+        dat["fireflyId"] = firefly_id
+        dat["timestamp"] = int(time.time())
 
         fireflies.insert_one(dict(dat))
 
