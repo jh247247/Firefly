@@ -4,10 +4,7 @@
     <RootPropertyPathName Name="DefaultViewModel" />
     <RootPropertyPathName Name="Item" />
     <RootPropertyPathName Name="Title" />
-    <RootPropertyPathName Name="SecondGroup" />
-    <RootPropertyPathName Name="Items" />
-    <RootPropertyPathName Name="Description" />
-    <RootPropertyPathName Name="FirstGroup" />
+    <RootPropertyPathName Name="Groups" />
   </Roots.PropertyPathNames>
   <Roots.RootTypes>
     <RootType FullName="Windows.UI.Xaml.Application" />
@@ -16,6 +13,7 @@
       <RootProperty Name="Background" />
       <RootProperty Name="Transitions" />
       <RootProperty Name="Content" />
+      <RootProperty Name="Resources" />
       <RootProperty Name="BottomAppBar" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.Binding">
@@ -27,10 +25,7 @@
     <RootType FullName="Windows.UI.Xaml.Media.Animation.NavigationThemeTransition">
       <RootProperty Name="DefaultNavigationTransitionInfo" />
     </RootType>
-    <RootType FullName="Windows.UI.Xaml.Media.Animation.ContinuumNavigationTransitionInfo">
-      <RootMethod Name="GetExitElementContainer" />
-      <RootMethod Name="SetExitElementContainer" />
-    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Media.Animation.ContinuumNavigationTransitionInfo" />
     <RootType FullName="Windows.UI.Xaml.Controls.Grid">
       <RootProperty Name="ChildrenTransitions" />
       <RootProperty Name="RowDefinitions" />
@@ -46,6 +41,7 @@
     <RootType FullName="Windows.UI.Xaml.Controls.StackPanel">
       <RootProperty Name="Margin" />
       <RootProperty Name="Children" />
+      <RootProperty Name="Orientation" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.TextBlock">
       <RootProperty Name="Text" />
@@ -53,44 +49,52 @@
       <RootProperty Name="Margin" />
       <RootProperty Name="CharacterSpacing" />
       <RootProperty Name="TextWrapping" />
+      <RootProperty Name="Foreground" />
+      <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="HorizontalAlignment" />
+      <RootProperty Name="Width" />
+      <RootProperty Name="FontWeight" />
+      <RootProperty Name="FontSize" />
     </RootType>
     <RootType FullName="rediscover.ItemPage" />
+    <RootType FullName="Windows.UI.Xaml.Controls.UserControl">
+      <RootProperty Name="Content" />
+    </RootType>
+    <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.StaticResourceExtension" />
+    <RootType FullName="rediscover.ItemViewerFirefly" />
+    <RootType FullName="Windows.UI.Xaml.DataTemplate">
+      <RootProperty Name="Template" />
+    </RootType>
     <RootType FullName="Windows.UI.Xaml.Media.Animation.CommonNavigationTransitionInfo">
       <RootProperty Name="IsStaggeringEnabled" />
       <RootMethod Name="GetIsStaggerElement" />
       <RootMethod Name="SetIsStaggerElement" />
     </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.CommandBar">
+      <RootProperty Name="PrimaryCommands" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.AppBarButton">
+      <RootProperty Name="Icon" />
+      <RootProperty Name="Label" />
+      <RootEvent Name="Click" />
+    </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Pivot">
       <RootProperty Name="Title" />
       <RootProperty Name="Items" />
-      <RootMethod Name="GetSlideInAnimationGroup" />
-      <RootMethod Name="SetSlideInAnimationGroup" />
+      <RootEvent Name="SelectionChanged" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.PivotItem">
-      <RootProperty Name="Margin" />
       <RootProperty Name="Header" />
       <RootProperty Name="DataContext" />
       <RootProperty Name="Content" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ListView">
-      <RootProperty Name="ItemsSource" />
-      <RootProperty Name="IsItemClickEnabled" />
       <RootProperty Name="ItemTemplate" />
+      <RootProperty Name="SelectionMode" />
+      <RootProperty Name="IsItemClickEnabled" />
+      <RootProperty Name="Margin" />
       <RootEvent Name="ItemClick" />
-      <RootEvent Name="Loaded" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.DataTemplate">
-      <RootProperty Name="Template" />
-    </RootType>
-    <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.StaticResourceExtension" />
-    <RootType FullName="Windows.UI.Xaml.Controls.CommandBar">
-      <RootProperty Name="PrimaryCommands" />
-      <RootProperty Name="SecondaryCommands" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.AppBarButton">
-      <RootProperty Name="Label" />
-      <RootProperty Name="Icon" />
-      <RootEvent Name="Click" />
+      <RootEvent Name="ContainerContentChanging" />
     </RootType>
     <RootType FullName="rediscover.PivotPage" />
   </Roots.RootTypes>

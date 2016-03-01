@@ -60,6 +60,9 @@
     <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\bin\Debug\ItemPage.xbf">
       <PackagePath>ItemPage.xbf</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\bin\Debug\ItemViewerFirefly.xbf">
+      <PackagePath>ItemViewerFirefly.xbf</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\bin\Debug\PivotPage.xbf">
       <PackagePath>PivotPage.xbf</PackagePath>
     </AppxPackagedFile>

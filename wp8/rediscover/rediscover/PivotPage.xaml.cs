@@ -1,5 +1,6 @@
 ﻿using rediscover.Common;
 using rediscover.Data;
+using rediscover.DataModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -25,12 +27,12 @@ namespace rediscover
 {
     public sealed partial class PivotPage : Page
     {
-        private const string FirstGroupName = "FirstGroup";
-        private const string SecondGroupName = "SecondGroup";
-
         private readonly NavigationHelper navigationHelper;
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
-        private readonly ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Resources");
+
+        public static FireflyCollection fireflies { get; set; }
+        Windows.Storage.ApplicationDataContainer localSettings;
+        SynchronizationContext _syncContext;
 
         public PivotPage()
         {
@@ -41,101 +43,126 @@ namespace rediscover
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+
+            _syncContext = SynchronizationContext.Current;
+
+            fireflies = new FireflyCollection();
+            addSampleFireflies();
+            lstFireflies.ItemsSource = fireflies;
         }
 
-        /// <summary>
-        /// Gets the <see cref="NavigationHelper"/> associated with this <see cref="Page"/>.
-        /// </summary>
         public NavigationHelper NavigationHelper
         {
             get { return this.navigationHelper; }
         }
 
-        /// <summary>
-        /// Gets the view model for this <see cref="Page"/>.
-        /// This can be changed to a strongly typed view model.
-        /// </summary>
         public ObservableDictionary DefaultViewModel
         {
             get { return this.defaultViewModel; }
         }
-
-        /// <summary>
-        /// Populates the page with content passed during navigation. Any saved state is also
-        /// provided when recreating a page from a prior session.
-        /// </summary>
-        /// <param name="sender">
-        /// The source of the event; typically <see cref="NavigationHelper"/>.
-        /// </param>
-        /// <param name="e">Event data that provides both the navigation parameter passed to
-        /// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested and
-        /// a dictionary of state preserved by this page during an earlier
-        /// session. The state will be null the first time a page is visited.</param>
+        
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            // TODO: Create an appropriate data model for your problem domain to replace the sample data
-            var sampleDataGroup = await SampleDataSource.GetGroupAsync("Group-1");
-            this.DefaultViewModel[FirstGroupName] = sampleDataGroup;
+            
         }
-
-        /// <summary>
-        /// Preserves state associated with this page in case the application is suspended or the
-        /// page is discarded from the navigation cache. Values must conform to the serialization
-        /// requirements of <see cref="SuspensionManager.SessionState"/>.
-        /// </summary>
-        /// <param name="sender">The source of the event; typically <see cref="NavigationHelper"/>.</param>
-        /// <param name="e">Event data that provides an empty dictionary to be populated with
-        /// serializable state.</param>
+        
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
         {
-            // TODO: Save the unique state of the page here.
+            
         }
 
-        /// <summary>
-        /// Adds an item to the list when the app bar button is clicked.
-        /// </summary>
-        private void AddAppBarButton_Click(object sender, RoutedEventArgs e)
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            string groupName = this.pivot.SelectedIndex == 0 ? FirstGroupName : SecondGroupName;
-            var group = this.DefaultViewModel[groupName] as SampleDataGroup;
-            var nextItemId = group.Items.Count + 1;
-            var newItem = new SampleDataItem(
-                string.Format(CultureInfo.InvariantCulture, "Group-{0}-Item-{1}", this.pivot.SelectedIndex + 1, nextItemId),
-                string.Format(CultureInfo.CurrentCulture, this.resourceLoader.GetString("NewItemTitle"), nextItemId),
-                string.Empty,
-                string.Empty,
-                this.resourceLoader.GetString("NewItemDescription"),
-                string.Empty);
-
-            group.Items.Add(newItem);
-
-            // Scroll the new item into view.
-            var container = this.pivot.ContainerFromIndex(this.pivot.SelectedIndex) as ContentControl;
-            var listView = container.ContentTemplateRoot as ListView;
-            listView.ScrollIntoView(newItem, ScrollIntoViewAlignment.Leading);
+            //Frame.Navigate(typeof(SettingsPage));
         }
 
-        /// <summary>
-        /// Invoked when an item within a section is clicked.
-        /// </summary>
-        private void ItemView_ItemClick(object sender, ItemClickEventArgs e)
+        private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            // Navigate to the appropriate destination page, configuring the new page
-            // by passing required information as a navigation parameter
-            var itemId = ((SampleDataItem)e.ClickedItem).UniqueId;
-            if (!Frame.Navigate(typeof(ItemPage), itemId))
+            //Frame.Navigate(typeof(SearchPage));
+        }
+
+        private void pvtMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (((Pivot)sender).SelectedIndex == 0)
             {
-                throw new Exception(this.resourceLoader.GetString("NavigationFailedExceptionMessage"));
+                // Refresh Fireflies
+            }
+            else if (((Pivot)sender).SelectedIndex == 1)
+            {
+                // Refresh Nodes
             }
         }
 
-        /// <summary>
-        /// Loads the content for the second pivot item when it is scrolled into view.
-        /// </summary>
-        private async void SecondPivot_Loaded(object sender, RoutedEventArgs e)
+        #region Contacts ListView
+
+        private void lstFireflies_ItemClick(object sender, ItemClickEventArgs e)
         {
-            var sampleDataGroup = await SampleDataSource.GetGroupAsync("Group-2");
-            this.DefaultViewModel[SecondGroupName] = sampleDataGroup;
+            var fireflyClicked = ((Firefly) e.ClickedItem);
+            if (!Frame.Navigate(typeof(ItemPage), fireflyClicked))
+            {
+                throw new Exception("Navigation Failed Exception");
+            }
+        }
+
+        // Load listview contents in stages for user-responsiveness
+        private void lstFireflies_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            ItemViewerFirefly iv = args.ItemContainer.ContentTemplateRoot as ItemViewerFirefly;
+
+            if (args.InRecycleQueue == true)
+            {
+                iv.ClearData();
+            }
+            else if (args.Phase == 0)
+            {
+                iv.ShowPlaceholder(args.Item as Firefly);
+                args.RegisterUpdateCallback(ContainerContentChangingDelegate);
+            }
+            else if (args.Phase == 1)
+            {
+                iv.ShowId();
+                args.RegisterUpdateCallback(ContainerContentChangingDelegate);
+            }
+            else if (args.Phase == 2)
+            {
+                iv.ShowAttribute();
+            }
+
+            args.Handled = true;
+        }
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> ContainerContentChangingDelegate
+        {
+            get
+            {
+                if (_delegate == null)
+                {
+                    _delegate = new TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs>(lstFireflies_ContainerContentChanging);
+                }
+                return _delegate;
+            }
+        }
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> _delegate;
+
+        private void RefreshContactsListView()
+        {
+            _syncContext.Post((s) =>
+            {
+                // TODO: Find better way of refreshing listview
+                lstFireflies.ItemsSource = null;
+                lstFireflies.ItemsSource = fireflies;
+            }, null);
+        }
+
+        #endregion
+
+        private void addSampleFireflies()
+        {
+            Firefly firefly = new Firefly("123", "Thermometer 1");
+            fireflies.Add(firefly);
+            firefly = new Firefly("456", "Air bed 2");
+            fireflies.Add(firefly);
+            firefly = new Firefly("789", "Clipboard 3");
+            fireflies.Add(firefly);
         }
 
         #region NavigationHelper registration

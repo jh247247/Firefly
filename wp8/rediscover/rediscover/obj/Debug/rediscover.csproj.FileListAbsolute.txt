@@ -35,3 +35,8 @@ C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj
 C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\qualifiers.txt.intermediate
 C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\MultipleQualifiersPerDimensionFound.txt
 C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\ProjectArchitectures.txt
+C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\ItemViewerFirefly.g.i.cs
+C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\ItemViewerFirefly.g.cs
+C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\ItemViewerFirefly.xaml
+C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\obj\Debug\ItemViewerFirefly.xbf
+C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\bin\Debug\ItemViewerFirefly.xbf

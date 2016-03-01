@@ -9,6 +9,13 @@
     mc:Ignorable="d"
     DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="FireflyListItemViewerTemplate">
+            <local:ItemViewerFirefly/>
+        </DataTemplate>
+    </Page.Resources>
+
     <Page.Transitions>
         <TransitionCollection>
             <NavigationThemeTransition>
@@ -19,87 +26,24 @@
         </TransitionCollection>
     </Page.Transitions>
 
-    <Grid>
-        <Pivot x:Uid="Pivot" Title="MY APPLICATION" x:Name="pivot" CommonNavigationTransitionInfo.IsStaggerElement="True">
-            <!--Pivot item one-->
-            <PivotItem
-                x:Uid="PivotItem1"
-                Margin="19,14.5,0,0"
-                Header="first"
-                DataContext="{Binding FirstGroup}"
-                d:DataContext="{Binding Groups[0], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}"
-                CommonNavigationTransitionInfo.IsStaggerElement="True">
-                <!--Double line list with text wrapping-->
-                <ListView
-                    ItemsSource="{Binding Items}"
-                    IsItemClickEnabled="True"
-                    ItemClick="ItemView_ItemClick"
-                    ContinuumNavigationTransitionInfo.ExitElementContainer="True">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="0,0,0,9.5">
-                                <TextBlock
-                                    Text="{Binding Title}"
-                                    TextWrapping="Wrap"
-                                    Pivot.SlideInAnimationGroup="1"
-                                    CommonNavigationTransitionInfo.IsStaggerElement="True"
-                                    Style="{ThemeResource ListViewItemTextBlockStyle}"
-                                    Margin="0,0,19,0"/>
-                                <TextBlock
-                                    Text="{Binding Description}"
-                                    TextWrapping="WrapWholeWords"
-                                    Pivot.SlideInAnimationGroup="2" 
-                                    CommonNavigationTransitionInfo.IsStaggerElement="True" 
-                                    Style="{ThemeResource ListViewItemContentTextBlockStyle}"
-                                    Margin="0,0,19,0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+    <Page.BottomAppBar>
+        <CommandBar>
+            <AppBarButton x:Name="btnSettings" Icon="Setting" Label="Settings" Click="btnSettings_Click"/>
+            <AppBarButton x:Name="btnSearch" Icon="Find" Label="Search" Click="btnSearch_Click"/>
+        </CommandBar>
+    </Page.BottomAppBar>
+
+    <Grid x:Name="LayoutRoot">
+        <Pivot x:Uid="Pivot" Title="rediscover" x:Name="pvtMain" CommonNavigationTransitionInfo.IsStaggerElement="True" SelectionChanged="pvtMain_SelectionChanged">
+            <PivotItem Header="fireflies" DataContext="{Binding Groups[0]}">
+                <ListView x:Name="lstFireflies" ItemTemplate="{StaticResource FireflyListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="lstFireflies_ItemClick" ContainerContentChanging="lstFireflies_ContainerContentChanging" Margin="0,0,0,20" />
             </PivotItem>
 
-            <!--Pivot item two-->
-            <PivotItem
-                x:Uid="PivotItem2"
-                Margin="19,14.5,0,0"
-                Header="second"
-                DataContext="{Binding SecondGroup}"
-                d:DataContext="{Binding Groups[1], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}">
-                <!--Double line list no text wrapping-->
-                <ListView
-                    ItemsSource="{Binding Items}"
-                    IsItemClickEnabled="True"
-                    ItemClick="ItemView_ItemClick"
-                    Loaded="SecondPivot_Loaded"
-                    ContinuumNavigationTransitionInfo.ExitElementContainer="True">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="0,0,0,9.5">
-                                <TextBlock
-                                    Text="{Binding Title}"
-                                    Pivot.SlideInAnimationGroup="1"
-                                    CommonNavigationTransitionInfo.IsStaggerElement="True"
-                                    Style="{StaticResource ListViewItemTextBlockStyle}"/>
-                                <TextBlock
-                                    Text="{Binding Description}"
-                                    Pivot.SlideInAnimationGroup="2"
-                                    CommonNavigationTransitionInfo.IsStaggerElement="True"
-                                    Style="{StaticResource ListViewItemContentTextBlockStyle}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+            <PivotItem Header="nodes" DataContext="{Binding Groups[0]}">
+                <!--<ListView x:Name="lstNodes" ItemTemplate="{StaticResource NodeListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="lstNodes_ItemClick" ContainerContentChanging="lstNodes_ContainerContentChanging" Margin="0,0,0,20" />
+                -->
             </PivotItem>
         </Pivot>
     </Grid>
-
-    <Page.BottomAppBar>
-        <CommandBar>
-            <AppBarButton x:Uid="AddAppBarButton" x:Name="AddAppBarButton" Label="add" Icon="Add" Click="AddAppBarButton_Click" />
-            <CommandBar.SecondaryCommands>
-                <AppBarButton x:Uid="SecondaryButton1" x:Name="SecondaryButton1" Label="secondary command 1" />
-                <AppBarButton x:Uid="SecondaryButton2" x:Name="SecondaryButton2" Label="secondary command 2" />
-            </CommandBar.SecondaryCommands>
-        </CommandBar>
-    </Page.BottomAppBar>
+    
 </Page>
