@@ -60,7 +60,29 @@ namespace rediscover
 
             monitorUri = "http://" + monitorIPAddress + ":" + monitorPort + "/";
 
-            getFirefliesFromMonitor();
+            getMonitorIPAddress();
+
+            //getFirefliesFromMonitor();
+        }
+
+        public async void getMonitorIPAddress()
+        {
+            var domains = await ZeroconfResolver.BrowseDomainsAsync();
+
+            //var responses = await ZeroconfResolver.ResolveAsync(domains.Select(g => g.Key));
+            var responses = await ZeroconfResolver.ResolveAsync("_rediscover._tcp.local."); // "_http._tcp"
+
+            foreach (var response in responses)
+            {
+                fireflies.Add(new Firefly("Zeroconf Responses", response.IPAddress));
+            }
+            RefreshFirefliesListView();
+
+            foreach (var domain in domains)
+            {
+                fireflies.Add(new Firefly("Zeroconf Domains", domain.ToString()));
+            }
+            RefreshFirefliesListView();
         }
 
         public async void getFirefliesFromMonitor()

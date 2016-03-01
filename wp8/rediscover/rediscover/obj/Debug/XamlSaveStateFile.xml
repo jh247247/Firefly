@@ -1,6 +1,6 @@
 <XamlCompilerSaveState>
   <ReferenceAssemblyList>
-    <LocalAssembly PathName="c:\users\nick\dropbox\my stuff\imagine cup\firefly\wp8\rediscover\rediscover\obj\debug\intermediatexaml\rediscover.exe" HashGuid="c7fa255a-ec78-2c96-9b45-e8e4deba18a2" />
+    <LocalAssembly PathName="c:\users\nick\dropbox\my stuff\imagine cup\firefly\wp8\rediscover\rediscover\obj\debug\intermediatexaml\rediscover.exe" HashGuid="7cb696a9-2413-e7d7-4ce4-b5714e40e2cc" />
     <ReferenceAssembly PathName="c:\users\nick\dropbox\my stuff\imagine cup\firefly\wp8\rediscover\packages\rx-core.2.2.5\lib\portable-win81+wpa81\system.reactive.core.dll" HashGuid="e88ff990-7aa8-b77f-93a1-598ee1f64e5f" />
     <ReferenceAssembly PathName="c:\users\nick\dropbox\my stuff\imagine cup\firefly\wp8\rediscover\packages\rx-interfaces.2.2.5\lib\portable-win81+wpa81\system.reactive.interfaces.dll" HashGuid="2fd855ee-8440-f81f-a427-ceb8eb15ce8f" />
     <ReferenceAssembly PathName="c:\users\nick\dropbox\my stuff\imagine cup\firefly\wp8\rediscover\packages\rx-linq.2.2.5\lib\portable-win81+wpa81\system.reactive.linq.dll" HashGuid="415e3b50-c164-f753-1f27-a0a2efe20748" />
