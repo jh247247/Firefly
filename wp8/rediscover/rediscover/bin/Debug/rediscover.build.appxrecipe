@@ -21,6 +21,18 @@
     <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\bin\Debug\rediscover.exe">
       <PackagePath>rediscover.exe</PackagePath>
     </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\packages\Rx-Core.2.2.5\lib\portable-win81+wpa81\System.Reactive.Core.dll">
+      <PackagePath>System.Reactive.Core.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\packages\Rx-Interfaces.2.2.5\lib\portable-win81+wpa81\System.Reactive.Interfaces.dll">
+      <PackagePath>System.Reactive.Interfaces.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\packages\Rx-Linq.2.2.5\lib\portable-win81+wpa81\System.Reactive.Linq.dll">
+      <PackagePath>System.Reactive.Linq.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\packages\Zeroconf.2.5.0\lib\portable-win81+wpa81\Zeroconf.dll">
+      <PackagePath>Zeroconf.dll</PackagePath>
+    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\Assets\Logo.scale-240.png">
       <PackagePath>Assets\Logo.scale-240.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>

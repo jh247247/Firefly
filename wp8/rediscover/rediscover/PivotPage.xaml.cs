@@ -9,7 +9,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
+using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -20,6 +22,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Web.Http;
+using Zeroconf;
 
 // The Pivot Application template is documented at http://go.microsoft.com/fwlink/?LinkID=391641
 
@@ -33,6 +37,10 @@ namespace rediscover
         public static FireflyCollection fireflies { get; set; }
         Windows.Storage.ApplicationDataContainer localSettings;
         SynchronizationContext _syncContext;
+
+        public string monitorIPAddress = "192.168.2.81";
+        public string monitorPort = "5000";
+        public string monitorUri = "";
 
         public PivotPage()
         {
@@ -49,6 +57,35 @@ namespace rediscover
             fireflies = new FireflyCollection();
             addSampleFireflies();
             lstFireflies.ItemsSource = fireflies;
+
+            monitorUri = "http://" + monitorIPAddress + ":" + monitorPort + "/";
+
+            getFirefliesFromMonitor();
+        }
+
+        public async void getFirefliesFromMonitor()
+        {
+            // Http Get Request
+            var client = new HttpClient();
+            Uri uri = new Uri(monitorUri + "firefly");
+            var response = await client.GetAsync(uri);
+            
+            if (response.IsSuccessStatusCode) // Get Success
+            {
+                // Get Json
+                string content = await response.Content.ReadAsStringAsync();
+
+                // Parse Json
+                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+                JsonArray fireflyIds = jsonParsed.GetNamedArray("fireflyIds");
+
+                // Create fireflies from ids
+                foreach (JsonValue firefly in fireflyIds)
+                {
+                    fireflies.Add(new Firefly(firefly.GetString()));
+                }
+                RefreshFirefliesListView();
+            }
         }
 
         public NavigationHelper NavigationHelper
@@ -93,7 +130,7 @@ namespace rediscover
             }
         }
 
-        #region Contacts ListView
+        #region Firefly ListView
 
         private void lstFireflies_ItemClick(object sender, ItemClickEventArgs e)
         {
@@ -143,7 +180,7 @@ namespace rediscover
         }
         private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> _delegate;
 
-        private void RefreshContactsListView()
+        private void RefreshFirefliesListView()
         {
             _syncContext.Post((s) =>
             {
