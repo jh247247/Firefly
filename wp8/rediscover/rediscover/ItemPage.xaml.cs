@@ -1,5 +1,6 @@
 ﻿using rediscover.Common;
 using rediscover.Data;
+using rediscover.DataModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Windows.Input;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -28,6 +30,8 @@ namespace rediscover
     {
         private readonly NavigationHelper navigationHelper;
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
+
+        private Firefly fireflyClicked;
 
         public ItemPage()
         {
@@ -50,7 +54,43 @@ namespace rediscover
         
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            
+            fireflyClicked = (Firefly) e.NavigationParameter;
+
+            // Load details
+            tblId.Text = fireflyClicked.Id;
+
+            if (fireflyClicked.Attribute != "")
+            {
+                txtAttribute.Text = fireflyClicked.Attribute;
+                txtAttribute.FontStyle = Windows.UI.Text.FontStyle.Normal;
+            }
+            else
+            {
+                txtAttribute.Text = "Not set!";
+                txtAttribute.FontStyle = Windows.UI.Text.FontStyle.Italic;
+            }
+
+            if (fireflyClicked.LastUpdateTime != "")
+            {
+                tblLastUpdate.Text = fireflyClicked.LastUpdateTime;
+                tblLastUpdate.FontStyle = Windows.UI.Text.FontStyle.Normal;
+            }
+            else
+            {
+                tblLastUpdate.Text = "Unknown";
+                tblLastUpdate.FontStyle = Windows.UI.Text.FontStyle.Italic;
+            }
+
+            if (fireflyClicked.NodeId != "")
+            {
+                tblLocation.Text = fireflyClicked.NodeId;
+                tblLocation.FontStyle = Windows.UI.Text.FontStyle.Normal;
+            }
+            else
+            {
+                tblLocation.Text = "Unknown";
+                tblLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
+            }
         }
         
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
@@ -84,5 +124,36 @@ namespace rediscover
         }
 
         #endregion
+
+        private void txtAttribute_KeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                // Hide keyboard
+                InputPane.GetForCurrentView().TryHide();
+
+                // Remove Textbox focus
+                LoseFocus(sender);
+            }
+        }
+
+        private void txtAttribute_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Save
+            fireflyClicked.Attribute = txtAttribute.Text;
+
+            // Post
+
+        }
+
+        private void LoseFocus(object sender)
+        {
+            var control = sender as Control;
+            var isTabStop = control.IsTabStop;
+            control.IsTabStop = false;
+            control.IsEnabled = false;
+            control.IsEnabled = true;
+            control.IsTabStop = isTabStop;
+        }
     }
 }

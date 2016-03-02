@@ -60,25 +60,27 @@ namespace rediscover
 
             monitorUri = "http://" + monitorIPAddress + ":" + monitorPort + "/";
 
-            getMonitorIPAddress();
+            //getMonitorIPAddress();
 
             //getFirefliesFromMonitor();
         }
 
+        // TODO: Get working with rediscover
         public async void getMonitorIPAddress()
         {
             var domains = await ZeroconfResolver.BrowseDomainsAsync();
 
             //var responses = await ZeroconfResolver.ResolveAsync(domains.Select(g => g.Key));
-            var responses = await ZeroconfResolver.ResolveAsync("_rediscover._tcp.local."); // "_http._tcp"
+            var responses = await ZeroconfResolver.ResolveAsync("_http._tcp.local."); // This finds Brother printer
+            //var responses = await ZeroconfResolver.ResolveAsync("_rediscover._tcp.local."); // "_http._tcp"
 
             foreach (var response in responses)
             {
-                fireflies.Add(new Firefly("Zeroconf Responses", response.IPAddress));
+                fireflies.Add(new Firefly("Zeroconf Responses", response.DisplayName));
             }
             RefreshFirefliesListView();
-
-            foreach (var domain in domains)
+            
+            foreach (var domain in domains.Select(g => g.Key))
             {
                 fireflies.Add(new Firefly("Zeroconf Domains", domain.ToString()));
             }
@@ -122,7 +124,7 @@ namespace rediscover
         
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            
+            RefreshFirefliesListView();
         }
         
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)

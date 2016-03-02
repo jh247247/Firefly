@@ -3,7 +3,6 @@
   <Roots.PropertyPathNames>
     <RootPropertyPathName Name="DefaultViewModel" />
     <RootPropertyPathName Name="Item" />
-    <RootPropertyPathName Name="Title" />
     <RootPropertyPathName Name="Groups" />
   </Roots.PropertyPathNames>
   <Roots.RootTypes>
@@ -55,6 +54,12 @@
       <RootProperty Name="Width" />
       <RootProperty Name="FontWeight" />
       <RootProperty Name="FontSize" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.TextBox">
+      <RootProperty Name="Text" />
+      <RootProperty Name="Margin" />
+      <RootEvent Name="KeyUp" />
+      <RootEvent Name="LostFocus" />
     </RootType>
     <RootType FullName="rediscover.ItemPage" />
     <RootType FullName="Windows.UI.Xaml.Controls.UserControl">
