@@ -4,9 +4,11 @@ using rediscover.DataModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+//using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +17,7 @@ using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -42,6 +45,8 @@ namespace rediscover
         public string monitorPort = "5000";
         public string monitorUri = "";
 
+        public static string CURL_MEDIA_TYPE = "application/x-www-form-urlencoded"; // Only one that works!!!
+
         public PivotPage()
         {
             this.InitializeComponent();
@@ -62,7 +67,7 @@ namespace rediscover
 
             //getMonitorIPAddress();
 
-            //getFirefliesFromMonitor();
+            getFirefliesFromMonitor();
         }
 
         // TODO: Get working with rediscover
@@ -101,7 +106,7 @@ namespace rediscover
 
                 // Parse Json
                 JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
-                JsonArray fireflyIds = jsonParsed.GetNamedArray("fireflyIds");
+                JsonArray fireflyIds = jsonParsed.GetNamedArray("ids");
 
                 // Create fireflies from ids
                 foreach (JsonValue firefly in fireflyIds)
@@ -158,8 +163,16 @@ namespace rediscover
 
         private void lstFireflies_ItemClick(object sender, ItemClickEventArgs e)
         {
-            var fireflyClicked = ((Firefly) e.ClickedItem);
-            if (!Frame.Navigate(typeof(ItemPage), fireflyClicked))
+            // Get firefly
+            var fireflyClicked = ((Firefly)e.ClickedItem);
+
+            // Setup Navigation args
+            List<object> itemPageNavList = new List<object>();
+            itemPageNavList.Add(this);
+            itemPageNavList.Add(fireflyClicked);
+            
+            // Navigate
+            if (!Frame.Navigate(typeof(ItemPage), itemPageNavList))
             {
                 throw new Exception("Navigation Failed Exception");
             }
@@ -224,6 +237,26 @@ namespace rediscover
             fireflies.Add(firefly);
             firefly = new Firefly("789", "Clipboard 3");
             fireflies.Add(firefly);
+        }
+
+        public async void postFireflyAttribute(Firefly fireflyToUpate)
+        {
+            // PUT data
+            Uri uri = new Uri(monitorUri + "firefly/" + fireflyToUpate.Id);
+            string usrData = "attribute=" + fireflyToUpate.Attribute;
+
+            // Http PUT Request
+            HttpClient client = new HttpClient();
+            HttpStringContent content = new HttpStringContent(usrData, UnicodeEncoding.Utf8, CURL_MEDIA_TYPE);
+            HttpResponseMessage response = await client.PutAsync(uri, content);
+
+            if (response.IsSuccessStatusCode) // Success
+            {
+                Debug.WriteLine("Put Success: " + fireflyToUpate.Id);
+            } else
+            {
+                Debug.WriteLine("Put Fail: " + fireflyToUpate.Id);
+            }
         }
 
         #region NavigationHelper registration

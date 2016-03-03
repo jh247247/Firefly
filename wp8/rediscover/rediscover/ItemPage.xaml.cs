@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Input;
 using Windows.Foundation;
@@ -32,6 +33,7 @@ namespace rediscover
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
 
         private Firefly fireflyClicked;
+        private PivotPage pivotPageRef;
 
         public ItemPage()
         {
@@ -54,7 +56,11 @@ namespace rediscover
         
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            fireflyClicked = (Firefly) e.NavigationParameter;
+            // Parse Navigation Args
+            List<object> itemPageNavList = (List<object>) e.NavigationParameter;
+
+            pivotPageRef = (PivotPage) itemPageNavList.ElementAt<object>(0);
+            fireflyClicked = (Firefly) itemPageNavList.ElementAt<object>(1);
 
             // Load details
             tblId.Text = fireflyClicked.Id;
@@ -143,7 +149,7 @@ namespace rediscover
             fireflyClicked.Attribute = txtAttribute.Text;
 
             // Post
-
+            pivotPageRef.postFireflyAttribute(fireflyClicked);
         }
 
         private void LoseFocus(object sender)
