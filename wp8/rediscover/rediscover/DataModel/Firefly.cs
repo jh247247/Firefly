@@ -48,6 +48,24 @@ namespace rediscover.DataModel
             }
         }
 
+        private string _Battery = string.Empty;
+        public string Battery
+        {
+            get
+            {
+                return this._Battery;
+            }
+
+            set
+            {
+                if (this._Battery != value)
+                {
+                    this._Battery = value;
+                    this.OnPropertyChanged("Battery");
+                }
+            }
+        }
+
         private string _LastUpdateTime = string.Empty;
         public string LastUpdateTime
         {
