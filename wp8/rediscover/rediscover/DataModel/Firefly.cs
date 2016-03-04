@@ -11,6 +11,10 @@ namespace rediscover.DataModel
     {
         public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 
+        public Firefly()
+        {
+        }
+
         public Firefly(string initId)
         {
             Id = initId;
