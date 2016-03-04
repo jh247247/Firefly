@@ -89,8 +89,17 @@ namespace rediscover
 
             if (fireflyClicked.NodeId != "")
             {
-                tblLocation.Text = fireflyClicked.NodeId;
-                tblLocation.FontStyle = Windows.UI.Text.FontStyle.Normal;
+                string location = pivotPageRef.nodes.GetLocationOfNode(fireflyClicked.NodeId);
+                if (location != "")
+                {
+                    tblLocation.Text = location;
+                    tblLocation.FontStyle = Windows.UI.Text.FontStyle.Normal;
+                }
+                else
+                {
+                    tblLocation.Text = "At Node " + fireflyClicked.NodeId;
+                    tblLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
+                }
             }
             else
             {

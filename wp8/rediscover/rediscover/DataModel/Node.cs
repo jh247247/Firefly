@@ -152,5 +152,17 @@ namespace rediscover.DataModel
             }
             return false;
         }
+
+        public string GetLocationOfNode(string nodeId)
+        {
+            foreach (Node nodeTocheck in nodeCollection)
+            {
+                if (nodeTocheck.Id == nodeId)
+                {
+                    return nodeTocheck.Location;
+                }
+            }
+            return "";
+        }
     }
 }

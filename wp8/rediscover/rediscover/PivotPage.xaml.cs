@@ -37,8 +37,8 @@ namespace rediscover
         private readonly NavigationHelper navigationHelper;
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
 
-        public static FireflyCollection fireflies { get; set; }
-        public static NodeCollection nodes { get; set; }
+        public FireflyCollection fireflies { get; set; }
+        public NodeCollection nodes { get; set; }
         Windows.Storage.ApplicationDataContainer localSettings;
         SynchronizationContext _syncContext;
 

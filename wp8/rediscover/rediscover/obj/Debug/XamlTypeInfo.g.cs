@@ -124,7 +124,7 @@ namespace rediscover.rediscover_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[12];
+            _typeNameTable = new string[14];
             _typeNameTable[0] = "rediscover.ItemPageNode";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
@@ -137,8 +137,10 @@ namespace rediscover.rediscover_XamlTypeInfo
             _typeNameTable[9] = "rediscover.ItemViewerNode";
             _typeNameTable[10] = "rediscover.ItemViewerFirefly";
             _typeNameTable[11] = "rediscover.PivotPage";
+            _typeNameTable[12] = "rediscover.DataModel.FireflyCollection";
+            _typeNameTable[13] = "rediscover.DataModel.NodeCollection";
 
-            _typeTable = new global::System.Type[12];
+            _typeTable = new global::System.Type[14];
             _typeTable[0] = typeof(global::rediscover.ItemPageNode);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
@@ -151,6 +153,8 @@ namespace rediscover.rediscover_XamlTypeInfo
             _typeTable[9] = typeof(global::rediscover.ItemViewerNode);
             _typeTable[10] = typeof(global::rediscover.ItemViewerFirefly);
             _typeTable[11] = typeof(global::rediscover.PivotPage);
+            _typeTable[12] = typeof(global::rediscover.DataModel.FireflyCollection);
+            _typeTable[13] = typeof(global::rediscover.DataModel.NodeCollection);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -191,6 +195,8 @@ namespace rediscover.rediscover_XamlTypeInfo
         private object Activate_9_ItemViewerNode() { return new global::rediscover.ItemViewerNode(); }
         private object Activate_10_ItemViewerFirefly() { return new global::rediscover.ItemViewerFirefly(); }
         private object Activate_11_PivotPage() { return new global::rediscover.PivotPage(); }
+        private object Activate_12_FireflyCollection() { return new global::rediscover.DataModel.FireflyCollection(); }
+        private object Activate_13_NodeCollection() { return new global::rediscover.DataModel.NodeCollection(); }
         private void MapAdd_5_ObservableDictionary(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.String, global::System.Object>)instance;
@@ -279,8 +285,24 @@ namespace rediscover.rediscover_XamlTypeInfo
             case 11:   //  rediscover.PivotPage
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
                 userType.Activator = Activate_11_PivotPage;
+                userType.AddMemberName("fireflies");
+                userType.AddMemberName("nodes");
                 userType.AddMemberName("NavigationHelper");
                 userType.AddMemberName("DefaultViewModel");
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 12:   //  rediscover.DataModel.FireflyCollection
+                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.SetIsReturnTypeStub();
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 13:   //  rediscover.DataModel.NodeCollection
+                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
+                userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -309,12 +331,32 @@ namespace rediscover.rediscover_XamlTypeInfo
             var that = (global::rediscover.ItemPageFirefly)instance;
             return that.DefaultViewModel;
         }
-        private object get_4_PivotPage_NavigationHelper(object instance)
+        private object get_4_PivotPage_fireflies(object instance)
+        {
+            var that = (global::rediscover.PivotPage)instance;
+            return that.fireflies;
+        }
+        private void set_4_PivotPage_fireflies(object instance, object Value)
+        {
+            var that = (global::rediscover.PivotPage)instance;
+            that.fireflies = (global::rediscover.DataModel.FireflyCollection)Value;
+        }
+        private object get_5_PivotPage_nodes(object instance)
+        {
+            var that = (global::rediscover.PivotPage)instance;
+            return that.nodes;
+        }
+        private void set_5_PivotPage_nodes(object instance, object Value)
+        {
+            var that = (global::rediscover.PivotPage)instance;
+            that.nodes = (global::rediscover.DataModel.NodeCollection)Value;
+        }
+        private object get_6_PivotPage_NavigationHelper(object instance)
         {
             var that = (global::rediscover.PivotPage)instance;
             return that.NavigationHelper;
         }
-        private object get_5_PivotPage_DefaultViewModel(object instance)
+        private object get_7_PivotPage_DefaultViewModel(object instance)
         {
             var that = (global::rediscover.PivotPage)instance;
             return that.DefaultViewModel;
@@ -351,16 +393,28 @@ namespace rediscover.rediscover_XamlTypeInfo
                 xamlMember.Getter = get_3_ItemPageFirefly_DefaultViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
+            case "rediscover.PivotPage.fireflies":
+                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.PivotPage");
+                xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "fireflies", "rediscover.DataModel.FireflyCollection");
+                xamlMember.Getter = get_4_PivotPage_fireflies;
+                xamlMember.Setter = set_4_PivotPage_fireflies;
+                break;
+            case "rediscover.PivotPage.nodes":
+                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.PivotPage");
+                xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "nodes", "rediscover.DataModel.NodeCollection");
+                xamlMember.Getter = get_5_PivotPage_nodes;
+                xamlMember.Setter = set_5_PivotPage_nodes;
+                break;
             case "rediscover.PivotPage.NavigationHelper":
                 userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.PivotPage");
                 xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "NavigationHelper", "rediscover.Common.NavigationHelper");
-                xamlMember.Getter = get_4_PivotPage_NavigationHelper;
+                xamlMember.Getter = get_6_PivotPage_NavigationHelper;
                 xamlMember.SetIsReadOnly();
                 break;
             case "rediscover.PivotPage.DefaultViewModel":
                 userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.PivotPage");
                 xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "DefaultViewModel", "rediscover.Common.ObservableDictionary");
-                xamlMember.Getter = get_5_PivotPage_DefaultViewModel;
+                xamlMember.Getter = get_7_PivotPage_DefaultViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             }
