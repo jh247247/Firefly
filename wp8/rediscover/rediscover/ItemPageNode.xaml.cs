@@ -76,9 +76,9 @@ namespace rediscover
                 txtLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
             }
 
-            if (nodeClicked.LastUpdateTime != "")
+            if (nodeClicked.LastUpdateTime != new DateTime(0))
             {
-                tblLastUpdate.Text = nodeClicked.LastUpdateTime;
+                tblLastUpdate.Text = nodeClicked.LastUpdateTime.ToString();
                 tblLastUpdate.FontStyle = Windows.UI.Text.FontStyle.Normal;
             }
             else
@@ -148,8 +148,8 @@ namespace rediscover
             // Save
             nodeClicked.Location = txtLocation.Text;
 
-            // Post
-            pivotPageRef.postNodeLocation(nodeClicked);
+            // Put
+            pivotPageRef.putNodeLocation(nodeClicked);
         }
 
         private void LoseFocus(object sender)

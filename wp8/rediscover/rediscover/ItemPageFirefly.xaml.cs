@@ -76,9 +76,9 @@ namespace rediscover
                 txtAttribute.FontStyle = Windows.UI.Text.FontStyle.Italic;
             }
 
-            if (fireflyClicked.LastUpdateTime != "")
+            if (fireflyClicked.LastUpdateTime != new DateTime(0))
             {
-                tblLastUpdate.Text = fireflyClicked.LastUpdateTime;
+                tblLastUpdate.Text = fireflyClicked.LastUpdateTime.ToString();
                 tblLastUpdate.FontStyle = Windows.UI.Text.FontStyle.Normal;
             }
             else
@@ -148,8 +148,8 @@ namespace rediscover
             // Save
             fireflyClicked.Attribute = txtAttribute.Text;
 
-            // Post
-            pivotPageRef.postFireflyAttribute(fireflyClicked);
+            // Put
+            pivotPageRef.putFireflyAttribute(fireflyClicked);
         }
 
         private void LoseFocus(object sender)

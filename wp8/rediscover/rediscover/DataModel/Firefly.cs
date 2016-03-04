@@ -70,8 +70,8 @@ namespace rediscover.DataModel
             }
         }
 
-        private string _LastUpdateTime = string.Empty;
-        public string LastUpdateTime
+        private DateTime _LastUpdateTime = new DateTime(0);
+        public DateTime LastUpdateTime
         {
             get
             {
@@ -152,6 +152,11 @@ namespace rediscover.DataModel
         public void Remove(Firefly firefly)
         {
             fireflyCollection.Remove(firefly);
+        }
+
+        public void Clear()
+        {
+            fireflyCollection.Clear();
         }
 
         public bool Contains(Firefly firefly)

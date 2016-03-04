@@ -165,7 +165,9 @@ namespace rediscover
                 }
                 try
                 {
-                    newFirefly.LastUpdateTime = jsonParsed.GetNamedString("timestamp");
+                    var timestamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    timestamp = timestamp.AddSeconds(jsonParsed.GetNamedNumber("timestamp"));
+                    newFirefly.LastUpdateTime = timestamp.ToLocalTime();
                 }
                 catch (Exception ex)
                 {
@@ -256,7 +258,9 @@ namespace rediscover
                 }
                 try
                 {
-                    newNode.LastUpdateTime = jsonParsed.GetNamedString("timestamp");
+                    var timestamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    timestamp = timestamp.AddSeconds(jsonParsed.GetNamedNumber("timestamp"));
+                    newNode.LastUpdateTime = timestamp.ToLocalTime();
                 }
                 catch (Exception ex)
                 {
@@ -289,7 +293,7 @@ namespace rediscover
             }
         }
 
-        public async void postFireflyAttribute(Firefly fireflyToUpate)
+        public async void putFireflyAttribute(Firefly fireflyToUpate)
         {
             // PUT data
             Uri uri = new Uri(monitorUri + "firefly/" + fireflyToUpate.Id);
@@ -310,7 +314,7 @@ namespace rediscover
             }
         }
 
-        public async void postNodeLocation(Node nodeToUpate)
+        public async void putNodeLocation(Node nodeToUpate)
         {
             // PUT data
             Uri uri = new Uri(monitorUri + "node/" + nodeToUpate.Id);

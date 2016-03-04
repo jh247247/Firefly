@@ -52,8 +52,8 @@ namespace rediscover.DataModel
             }
         }
 
-        private string _LastUpdateTime = string.Empty;
-        public string LastUpdateTime
+        private DateTime _LastUpdateTime = new DateTime(0);
+        public DateTime LastUpdateTime
         {
             get
             {
@@ -134,6 +134,11 @@ namespace rediscover.DataModel
         public void Remove(Node node)
         {
             nodeCollection.Remove(node);
+        }
+
+        public void Clear()
+        {
+            nodeCollection.Clear();
         }
 
         public bool Contains(Node node)
