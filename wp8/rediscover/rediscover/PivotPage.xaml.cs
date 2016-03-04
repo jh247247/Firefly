@@ -97,6 +97,7 @@ namespace rediscover
             // Http Get Request
             var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "firefly");
+            Debug.WriteLine("Http GET of fireflies from monitor: " + uri);
             var response = await client.GetAsync(uri);
             
             if (response.IsSuccessStatusCode) // Get Success
@@ -109,11 +110,85 @@ namespace rediscover
                 JsonArray fireflyIds = jsonParsed.GetNamedArray("ids");
 
                 // Create fireflies from ids
-                foreach (JsonValue firefly in fireflyIds)
+                foreach (JsonValue fireflyId in fireflyIds)
                 {
-                    fireflies.Add(new Firefly(firefly.GetString()));
+                    getFireflyDetailsFromMonitor(fireflyId.GetString());
+                    //fireflies.Add(new Firefly(fireflyId.GetString()));
                 }
                 RefreshFirefliesListView();
+            }
+            else
+            {
+                Debug.WriteLine("Error: Http GET of fireflies from monitor failed: " + uri);
+            }
+        }
+
+        public async void getFireflyDetailsFromMonitor(string fireflyId)
+        {
+            // Http Get Request
+            var client = new HttpClient();
+            Uri uri = new Uri(monitorUri + "firefly/" + fireflyId);
+            Debug.WriteLine("Http GET of firefly details from monitor: " + uri);
+            var response = await client.GetAsync(uri);
+
+            if (response.IsSuccessStatusCode) // Get Success
+            {
+                // Get Json
+                string content = await response.Content.ReadAsStringAsync();
+
+                // Parse Json
+                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+                Debug.WriteLine(jsonParsed.GetNamedString("fireflyId"));
+
+                Firefly newFirefly = new Firefly();
+                try
+                {
+                    newFirefly.Id = jsonParsed.GetNamedString("fireflyId");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No id associated with firefly");
+                }
+                try
+                {
+                    newFirefly.Battery = jsonParsed.GetNamedString("bat");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No battery value associated with firefly");
+                }
+                try
+                {
+                    newFirefly.LastUpdateTime = jsonParsed.GetNamedString("timestamp");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No timestamp associated with firefly");
+                }
+                try
+                {
+                    newFirefly.NodeId = jsonParsed.GetNamedString("nodeId");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No nodeId associated with firefly");
+                }
+                try
+                {
+                    JsonObject usrData = jsonParsed["usrData"].GetObject();
+                    newFirefly.Attribute = usrData.GetNamedString("attribute");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No attribute associated with firefly");
+                }
+
+                fireflies.Add(newFirefly);
+                RefreshFirefliesListView();
+            }
+            else
+            {
+                Debug.WriteLine("Error: Http GET of firefly details from monitor failed: " + uri);
             }
         }
 
