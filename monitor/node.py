@@ -33,7 +33,7 @@ class node_res(fr.Resource):
         dat["nodeId"] = node_id
         dat["timestamp"] = int(time.time())
 
-        nodes.insert_one(dict(dat))
+        nodes.update_one({"nodeId":node_id}, {'$set': dict(dat)}, upsert=True)
 
         return dat
 
