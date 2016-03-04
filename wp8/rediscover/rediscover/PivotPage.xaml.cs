@@ -61,7 +61,7 @@ namespace rediscover
             _syncContext = SynchronizationContext.Current;
 
             fireflies = new FireflyCollection();
-            addSampleFireflies();
+            //addSampleFireflies();
             lstFireflies.ItemsSource = fireflies;
 
             nodes = new NodeCollection();
@@ -268,7 +268,7 @@ namespace rediscover
                 }
                 try
                 {
-                    newNode.FirefliesList = jsonParsed.GetNamedString("fireflies");
+                    newNode.FirefliesList = jsonParsed.GetNamedArray("fireflies");
                 }
                 catch (Exception ex)
                 {

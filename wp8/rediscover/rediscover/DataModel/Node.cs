@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Windows.Data.Json;
 
 namespace rediscover.DataModel
 {
@@ -70,8 +70,8 @@ namespace rediscover.DataModel
             }
         }
 
-        private string _FirefliesList = string.Empty;
-        public string FirefliesList
+        private JsonArray _FirefliesList = new JsonArray();
+        public JsonArray FirefliesList
         {
             get
             {

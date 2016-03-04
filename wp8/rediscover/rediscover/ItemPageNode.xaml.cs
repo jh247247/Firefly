@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Input;
+using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -87,9 +88,13 @@ namespace rediscover
                 tblLastUpdate.FontStyle = Windows.UI.Text.FontStyle.Italic;
             }
 
-            if (nodeClicked.FirefliesList != "")
+            if (nodeClicked.FirefliesList.Count != 0)
             {
-                tblFirefliesList.Text = nodeClicked.FirefliesList;
+                tblFirefliesList.Text = "";
+                foreach (JsonValue firefly in nodeClicked.FirefliesList)
+                {
+                    tblFirefliesList.Text += firefly.GetString() + "\n";
+                }
                 tblFirefliesList.FontStyle = Windows.UI.Text.FontStyle.Normal;
             }
             else

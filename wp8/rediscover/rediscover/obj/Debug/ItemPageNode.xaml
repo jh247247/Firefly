@@ -44,8 +44,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
+                <RowDefinition Height="3*" />
             </Grid.RowDefinitions>
 
             <TextBlock x:Name="tblLocationHeader" Grid.Row="0" Text="location" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
