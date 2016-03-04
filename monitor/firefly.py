@@ -24,9 +24,9 @@ class firefly_res(fr.Resource):
         dat = {"usrData" : request.form}
         dat["fireflyId"] = firefly_id
         dat["timestamp"] = int(time.time())
-
-        fireflies.insert_one(dict(dat))
-
+        
+        fireflies.update_one({"fireflyId":firefly_id}, {'$set': dict(dat)}, upsert=True)
+        
         return dat
 
 class fireflylist_res(fr.Resource):
