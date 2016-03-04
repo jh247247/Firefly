@@ -14,6 +14,9 @@
         <DataTemplate x:Key="FireflyListItemViewerTemplate">
             <local:ItemViewerFirefly/>
         </DataTemplate>
+        <DataTemplate x:Key="NodeListItemViewerTemplate">
+            <local:ItemViewerNode/>
+        </DataTemplate>
     </Page.Resources>
 
     <Page.Transitions>
@@ -40,8 +43,7 @@
             </PivotItem>
 
             <PivotItem Header="nodes" DataContext="{Binding Groups[0]}">
-                <!--<ListView x:Name="lstNodes" ItemTemplate="{StaticResource NodeListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="lstNodes_ItemClick" ContainerContentChanging="lstNodes_ContainerContentChanging" Margin="0,0,0,20" />
-                -->
+                <ListView x:Name="lstNodes" ItemTemplate="{StaticResource NodeListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="lstNodes_ItemClick" ContainerContentChanging="lstNodes_ContainerContentChanging" Margin="0,0,0,20" />
             </PivotItem>
         </Pivot>
     </Grid>

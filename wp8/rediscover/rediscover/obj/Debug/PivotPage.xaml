@@ -14,6 +14,9 @@
         <DataTemplate x:Key="FireflyListItemViewerTemplate">
             <local:ItemViewerFirefly/>
         </DataTemplate>
+        <DataTemplate x:Key="NodeListItemViewerTemplate">
+            <local:ItemViewerNode/>
+        </DataTemplate>
     </Page.Resources>
 
     <Page.Transitions>
@@ -36,12 +39,11 @@
     <Grid x:Name="LayoutRoot">
         <Pivot x:ConnectionId='3' x:Uid="Pivot" Title="rediscover" x:Name="pvtMain" CommonNavigationTransitionInfo.IsStaggerElement="True"                                            >
             <PivotItem Header="fireflies" DataContext="{Binding Groups[0]}">
-                <ListView x:ConnectionId='4' x:Name="lstFireflies" ItemTemplate="{StaticResource FireflyListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True"                                                                                                     Margin="0,0,0,20" />
+                <ListView x:ConnectionId='5' x:Name="lstFireflies" ItemTemplate="{StaticResource FireflyListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True"                                                                                                     Margin="0,0,0,20" />
             </PivotItem>
 
             <PivotItem Header="nodes" DataContext="{Binding Groups[0]}">
-                <!--<ListView x:Name="lstNodes" ItemTemplate="{StaticResource NodeListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="lstNodes_ItemClick" ContainerContentChanging="lstNodes_ContainerContentChanging" Margin="0,0,0,20" />
-                -->
+                <ListView x:ConnectionId='4' x:Name="lstNodes" ItemTemplate="{StaticResource NodeListItemViewerTemplate}" SelectionMode="None" IsItemClickEnabled="True"                                                                                             Margin="0,0,0,20" />
             </PivotItem>
         </Pivot>
     </Grid>

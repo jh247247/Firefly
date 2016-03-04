@@ -124,8 +124,8 @@ namespace rediscover.rediscover_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[10];
-            _typeNameTable[0] = "rediscover.ItemPage";
+            _typeNameTable = new string[12];
+            _typeNameTable[0] = "rediscover.ItemPageNode";
             _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
             _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
             _typeNameTable[3] = "rediscover.Common.NavigationHelper";
@@ -133,11 +133,13 @@ namespace rediscover.rediscover_XamlTypeInfo
             _typeNameTable[5] = "rediscover.Common.ObservableDictionary";
             _typeNameTable[6] = "Object";
             _typeNameTable[7] = "String";
-            _typeNameTable[8] = "rediscover.ItemViewerFirefly";
-            _typeNameTable[9] = "rediscover.PivotPage";
+            _typeNameTable[8] = "rediscover.ItemPageFirefly";
+            _typeNameTable[9] = "rediscover.ItemViewerNode";
+            _typeNameTable[10] = "rediscover.ItemViewerFirefly";
+            _typeNameTable[11] = "rediscover.PivotPage";
 
-            _typeTable = new global::System.Type[10];
-            _typeTable[0] = typeof(global::rediscover.ItemPage);
+            _typeTable = new global::System.Type[12];
+            _typeTable[0] = typeof(global::rediscover.ItemPageNode);
             _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
             _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
             _typeTable[3] = typeof(global::rediscover.Common.NavigationHelper);
@@ -145,8 +147,10 @@ namespace rediscover.rediscover_XamlTypeInfo
             _typeTable[5] = typeof(global::rediscover.Common.ObservableDictionary);
             _typeTable[6] = typeof(global::System.Object);
             _typeTable[7] = typeof(global::System.String);
-            _typeTable[8] = typeof(global::rediscover.ItemViewerFirefly);
-            _typeTable[9] = typeof(global::rediscover.PivotPage);
+            _typeTable[8] = typeof(global::rediscover.ItemPageFirefly);
+            _typeTable[9] = typeof(global::rediscover.ItemViewerNode);
+            _typeTable[10] = typeof(global::rediscover.ItemViewerFirefly);
+            _typeTable[11] = typeof(global::rediscover.PivotPage);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -181,10 +185,12 @@ namespace rediscover.rediscover_XamlTypeInfo
             return -1;
         }
 
-        private object Activate_0_ItemPage() { return new global::rediscover.ItemPage(); }
+        private object Activate_0_ItemPageNode() { return new global::rediscover.ItemPageNode(); }
         private object Activate_5_ObservableDictionary() { return new global::rediscover.Common.ObservableDictionary(); }
-        private object Activate_8_ItemViewerFirefly() { return new global::rediscover.ItemViewerFirefly(); }
-        private object Activate_9_PivotPage() { return new global::rediscover.PivotPage(); }
+        private object Activate_8_ItemPageFirefly() { return new global::rediscover.ItemPageFirefly(); }
+        private object Activate_9_ItemViewerNode() { return new global::rediscover.ItemViewerNode(); }
+        private object Activate_10_ItemViewerFirefly() { return new global::rediscover.ItemViewerFirefly(); }
+        private object Activate_11_PivotPage() { return new global::rediscover.PivotPage(); }
         private void MapAdd_5_ObservableDictionary(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.String, global::System.Object>)instance;
@@ -203,9 +209,9 @@ namespace rediscover.rediscover_XamlTypeInfo
             switch (typeIndex)
             {
 
-            case 0:   //  rediscover.ItemPage
+            case 0:   //  rediscover.ItemPageNode
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_0_ItemPage;
+                userType.Activator = Activate_0_ItemPageNode;
                 userType.AddMemberName("NavigationHelper");
                 userType.AddMemberName("DefaultViewModel");
                 userType.SetIsLocalType();
@@ -247,16 +253,32 @@ namespace rediscover.rediscover_XamlTypeInfo
                 xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 8:   //  rediscover.ItemViewerFirefly
-                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_8_ItemViewerFirefly;
+            case 8:   //  rediscover.ItemPageFirefly
+                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_8_ItemPageFirefly;
+                userType.AddMemberName("NavigationHelper");
+                userType.AddMemberName("DefaultViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 9:   //  rediscover.PivotPage
+            case 9:   //  rediscover.ItemViewerNode
+                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_9_ItemViewerNode;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 10:   //  rediscover.ItemViewerFirefly
+                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_10_ItemViewerFirefly;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 11:   //  rediscover.PivotPage
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_9_PivotPage;
+                userType.Activator = Activate_11_PivotPage;
                 userType.AddMemberName("NavigationHelper");
                 userType.AddMemberName("DefaultViewModel");
                 userType.SetIsLocalType();
@@ -267,22 +289,32 @@ namespace rediscover.rediscover_XamlTypeInfo
         }
 
 
-        private object get_0_ItemPage_NavigationHelper(object instance)
+        private object get_0_ItemPageNode_NavigationHelper(object instance)
         {
-            var that = (global::rediscover.ItemPage)instance;
+            var that = (global::rediscover.ItemPageNode)instance;
             return that.NavigationHelper;
         }
-        private object get_1_ItemPage_DefaultViewModel(object instance)
+        private object get_1_ItemPageNode_DefaultViewModel(object instance)
         {
-            var that = (global::rediscover.ItemPage)instance;
+            var that = (global::rediscover.ItemPageNode)instance;
             return that.DefaultViewModel;
         }
-        private object get_2_PivotPage_NavigationHelper(object instance)
+        private object get_2_ItemPageFirefly_NavigationHelper(object instance)
+        {
+            var that = (global::rediscover.ItemPageFirefly)instance;
+            return that.NavigationHelper;
+        }
+        private object get_3_ItemPageFirefly_DefaultViewModel(object instance)
+        {
+            var that = (global::rediscover.ItemPageFirefly)instance;
+            return that.DefaultViewModel;
+        }
+        private object get_4_PivotPage_NavigationHelper(object instance)
         {
             var that = (global::rediscover.PivotPage)instance;
             return that.NavigationHelper;
         }
-        private object get_3_PivotPage_DefaultViewModel(object instance)
+        private object get_5_PivotPage_DefaultViewModel(object instance)
         {
             var that = (global::rediscover.PivotPage)instance;
             return that.DefaultViewModel;
@@ -295,28 +327,40 @@ namespace rediscover.rediscover_XamlTypeInfo
 
             switch (longMemberName)
             {
-            case "rediscover.ItemPage.NavigationHelper":
-                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.ItemPage");
+            case "rediscover.ItemPageNode.NavigationHelper":
+                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.ItemPageNode");
                 xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "NavigationHelper", "rediscover.Common.NavigationHelper");
-                xamlMember.Getter = get_0_ItemPage_NavigationHelper;
+                xamlMember.Getter = get_0_ItemPageNode_NavigationHelper;
                 xamlMember.SetIsReadOnly();
                 break;
-            case "rediscover.ItemPage.DefaultViewModel":
-                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.ItemPage");
+            case "rediscover.ItemPageNode.DefaultViewModel":
+                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.ItemPageNode");
                 xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "DefaultViewModel", "rediscover.Common.ObservableDictionary");
-                xamlMember.Getter = get_1_ItemPage_DefaultViewModel;
+                xamlMember.Getter = get_1_ItemPageNode_DefaultViewModel;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "rediscover.ItemPageFirefly.NavigationHelper":
+                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.ItemPageFirefly");
+                xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "NavigationHelper", "rediscover.Common.NavigationHelper");
+                xamlMember.Getter = get_2_ItemPageFirefly_NavigationHelper;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "rediscover.ItemPageFirefly.DefaultViewModel":
+                userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.ItemPageFirefly");
+                xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "DefaultViewModel", "rediscover.Common.ObservableDictionary");
+                xamlMember.Getter = get_3_ItemPageFirefly_DefaultViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             case "rediscover.PivotPage.NavigationHelper":
                 userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.PivotPage");
                 xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "NavigationHelper", "rediscover.Common.NavigationHelper");
-                xamlMember.Getter = get_2_PivotPage_NavigationHelper;
+                xamlMember.Getter = get_4_PivotPage_NavigationHelper;
                 xamlMember.SetIsReadOnly();
                 break;
             case "rediscover.PivotPage.DefaultViewModel":
                 userType = (global::rediscover.rediscover_XamlTypeInfo.XamlUserType)GetXamlTypeByName("rediscover.PivotPage");
                 xamlMember = new global::rediscover.rediscover_XamlTypeInfo.XamlMember(this, "DefaultViewModel", "rediscover.Common.ObservableDictionary");
-                xamlMember.Getter = get_3_PivotPage_DefaultViewModel;
+                xamlMember.Getter = get_5_PivotPage_DefaultViewModel;
                 xamlMember.SetIsReadOnly();
                 break;
             }
@@ -644,5 +688,8 @@ namespace rediscover.rediscover_XamlTypeInfo
         }
     }
 }
+
+
+
 
 

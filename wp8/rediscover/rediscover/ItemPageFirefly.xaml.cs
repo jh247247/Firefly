@@ -27,7 +27,7 @@ namespace rediscover
     /// <summary>
     /// A page that displays details for a single item within a group.
     /// </summary>
-    public sealed partial class ItemPage : Page
+    public sealed partial class ItemPageFirefly : Page
     {
         private readonly NavigationHelper navigationHelper;
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
@@ -35,7 +35,7 @@ namespace rediscover
         private Firefly fireflyClicked;
         private PivotPage pivotPageRef;
 
-        public ItemPage()
+        public ItemPageFirefly()
         {
             this.InitializeComponent();
 

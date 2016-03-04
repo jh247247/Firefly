@@ -38,6 +38,7 @@ namespace rediscover
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
 
         public static FireflyCollection fireflies { get; set; }
+        public static NodeCollection nodes { get; set; }
         Windows.Storage.ApplicationDataContainer localSettings;
         SynchronizationContext _syncContext;
 
@@ -63,12 +64,18 @@ namespace rediscover
             addSampleFireflies();
             lstFireflies.ItemsSource = fireflies;
 
+            nodes = new NodeCollection();
+            lstNodes.ItemsSource = nodes;
+
             monitorUri = "http://" + monitorIPAddress + ":" + monitorPort + "/";
 
             //getMonitorIPAddress();
 
             getFirefliesFromMonitor();
+            getNodesFromMonitor();
         }
+
+        #region GET and PUT functions
 
         // TODO: Get working with rediscover
         public async void getMonitorIPAddress()
@@ -84,7 +91,7 @@ namespace rediscover
                 fireflies.Add(new Firefly("Zeroconf Responses", response.DisplayName));
             }
             RefreshFirefliesListView();
-            
+
             foreach (var domain in domains.Select(g => g.Key))
             {
                 fireflies.Add(new Firefly("Zeroconf Domains", domain.ToString()));
@@ -98,7 +105,7 @@ namespace rediscover
             var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "firefly");
             Debug.WriteLine("Http GET of fireflies from monitor: " + uri);
-            var response = await client.GetAsync(uri);
+            var response = await client.GetAsync(uri); // TODO: If System.Exception occurs here, bc monitor not running, check before get here
             
             if (response.IsSuccessStatusCode) // Get Success
             {
@@ -113,7 +120,6 @@ namespace rediscover
                 foreach (JsonValue fireflyId in fireflyIds)
                 {
                     getFireflyDetailsFromMonitor(fireflyId.GetString());
-                    //fireflies.Add(new Firefly(fireflyId.GetString()));
                 }
                 RefreshFirefliesListView();
             }
@@ -192,25 +198,140 @@ namespace rediscover
             }
         }
 
-        public NavigationHelper NavigationHelper
+        public async void getNodesFromMonitor()
         {
-            get { return this.navigationHelper; }
+            // Http Get Request
+            var client = new HttpClient();
+            Uri uri = new Uri(monitorUri + "node");
+            Debug.WriteLine("Http GET of nodes from monitor: " + uri);
+            var response = await client.GetAsync(uri);
+
+            if (response.IsSuccessStatusCode) // Get Success
+            {
+                // Get Json
+                string content = await response.Content.ReadAsStringAsync();
+
+                // Parse Json
+                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+                JsonArray nodeIds = jsonParsed.GetNamedArray("ids");
+
+                // Create fireflies from ids
+                foreach (JsonValue nodeId in nodeIds)
+                {
+                    getNodeDetailsFromMonitor(nodeId.GetString());
+                }
+                RefreshNodesListView();
+            }
+            else
+            {
+                Debug.WriteLine("Error: Http GET of nodes from monitor failed: " + uri);
+            }
         }
 
-        public ObservableDictionary DefaultViewModel
+        public async void getNodeDetailsFromMonitor(string nodeId)
         {
-            get { return this.defaultViewModel; }
+            // Http Get Request
+            var client = new HttpClient();
+            Uri uri = new Uri(monitorUri + "node/" + nodeId);
+            Debug.WriteLine("Http GET of node details from monitor: " + uri);
+            var response = await client.GetAsync(uri);
+
+            if (response.IsSuccessStatusCode) // Get Success
+            {
+                // Get Json
+                string content = await response.Content.ReadAsStringAsync();
+
+                // Parse Json
+                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+                Debug.WriteLine(jsonParsed.GetNamedString("nodeId"));
+
+                Node newNode = new Node();
+                try
+                {
+                    newNode.Id = jsonParsed.GetNamedString("nodeId");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No id associated with node");
+                }
+                try
+                {
+                    newNode.LastUpdateTime = jsonParsed.GetNamedString("timestamp");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No timestamp associated with node");
+                }
+                try
+                {
+                    newNode.FirefliesList = jsonParsed.GetNamedString("fireflies");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No fireflies list associated with node");
+                }
+                try
+                {
+                    JsonObject usrData = jsonParsed["usrData"].GetObject();
+                    newNode.Location = usrData.GetNamedString("location");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Warning: No location associated with node");
+                }
+
+                nodes.Add(newNode);
+                RefreshNodesListView();
+            }
+            else
+            {
+                Debug.WriteLine("Error: Http GET of node details from monitor failed: " + uri);
+            }
         }
-        
-        private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
+
+        public async void postFireflyAttribute(Firefly fireflyToUpate)
         {
-            RefreshFirefliesListView();
+            // PUT data
+            Uri uri = new Uri(monitorUri + "firefly/" + fireflyToUpate.Id);
+            string usrData = "attribute=" + fireflyToUpate.Attribute;
+
+            // Http PUT Request
+            HttpClient client = new HttpClient();
+            HttpStringContent content = new HttpStringContent(usrData, UnicodeEncoding.Utf8, CURL_MEDIA_TYPE);
+            HttpResponseMessage response = await client.PutAsync(uri, content);
+
+            if (response.IsSuccessStatusCode) // Success
+            {
+                Debug.WriteLine("Put Success: " + fireflyToUpate.Id);
+            }
+            else
+            {
+                Debug.WriteLine("Put Fail: " + fireflyToUpate.Id);
+            }
         }
-        
-        private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
+
+        public async void postNodeLocation(Node nodeToUpate)
         {
-            
+            // PUT data
+            Uri uri = new Uri(monitorUri + "node/" + nodeToUpate.Id);
+            string usrData = "location=" + nodeToUpate.Location;
+
+            // Http PUT Request
+            HttpClient client = new HttpClient();
+            HttpStringContent content = new HttpStringContent(usrData, UnicodeEncoding.Utf8, CURL_MEDIA_TYPE);
+            HttpResponseMessage response = await client.PutAsync(uri, content);
+
+            if (response.IsSuccessStatusCode) // Success
+            {
+                Debug.WriteLine("Put Success: " + nodeToUpate.Id);
+            }
+            else
+            {
+                Debug.WriteLine("Put Fail: " + nodeToUpate.Id);
+            }
         }
+
+        #endregion
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -247,7 +368,7 @@ namespace rediscover
             itemPageNavList.Add(fireflyClicked);
             
             // Navigate
-            if (!Frame.Navigate(typeof(ItemPage), itemPageNavList))
+            if (!Frame.Navigate(typeof(ItemPageFirefly), itemPageNavList))
             {
                 throw new Exception("Navigation Failed Exception");
             }
@@ -265,12 +386,12 @@ namespace rediscover
             else if (args.Phase == 0)
             {
                 iv.ShowPlaceholder(args.Item as Firefly);
-                args.RegisterUpdateCallback(ContainerContentChangingDelegate);
+                args.RegisterUpdateCallback(ContainerContentChangingDelegateFireflies);
             }
             else if (args.Phase == 1)
             {
                 iv.ShowId();
-                args.RegisterUpdateCallback(ContainerContentChangingDelegate);
+                args.RegisterUpdateCallback(ContainerContentChangingDelegateFireflies);
             }
             else if (args.Phase == 2)
             {
@@ -279,18 +400,18 @@ namespace rediscover
 
             args.Handled = true;
         }
-        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> ContainerContentChangingDelegate
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> ContainerContentChangingDelegateFireflies
         {
             get
             {
-                if (_delegate == null)
+                if (_delegateFireflies == null)
                 {
-                    _delegate = new TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs>(lstFireflies_ContainerContentChanging);
+                    _delegateFireflies = new TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs>(lstFireflies_ContainerContentChanging);
                 }
-                return _delegate;
+                return _delegateFireflies;
             }
         }
-        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> _delegate;
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> _delegateFireflies;
 
         private void RefreshFirefliesListView()
         {
@@ -299,6 +420,76 @@ namespace rediscover
                 // TODO: Find better way of refreshing listview
                 lstFireflies.ItemsSource = null;
                 lstFireflies.ItemsSource = fireflies;
+            }, null);
+        }
+
+        #endregion
+
+        #region Node ListView
+
+        private void lstNodes_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // Get node
+            var nodeClicked = ((Node)e.ClickedItem);
+
+            // Setup Navigation args
+            List<object> itemPageNavList = new List<object>();
+            itemPageNavList.Add(this);
+            itemPageNavList.Add(nodeClicked);
+
+            // Navigate
+            if (!Frame.Navigate(typeof(ItemPageNode), itemPageNavList))
+            {
+                throw new Exception("Navigation Failed Exception");
+            }
+        }
+
+        // Load listview contents in stages for user-responsiveness
+        private void lstNodes_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            ItemViewerNode iv = args.ItemContainer.ContentTemplateRoot as ItemViewerNode;
+
+            if (args.InRecycleQueue == true)
+            {
+                iv.ClearData();
+            }
+            else if (args.Phase == 0)
+            {
+                iv.ShowPlaceholder(args.Item as Node);
+                args.RegisterUpdateCallback(ContainerContentChangingDelegateNodes);
+            }
+            else if (args.Phase == 1)
+            {
+                iv.ShowId();
+                args.RegisterUpdateCallback(ContainerContentChangingDelegateNodes);
+            }
+            else if (args.Phase == 2)
+            {
+                iv.ShowLocation();
+            }
+
+            args.Handled = true;
+        }
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> ContainerContentChangingDelegateNodes
+        {
+            get
+            {
+                if (_delegateNodes == null)
+                {
+                    _delegateNodes = new TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs>(lstNodes_ContainerContentChanging);
+                }
+                return _delegateNodes;
+            }
+        }
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> _delegateNodes;
+
+        private void RefreshNodesListView()
+        {
+            _syncContext.Post((s) =>
+            {
+                // TODO: Find better way of refreshing listview
+                lstNodes.ItemsSource = null;
+                lstNodes.ItemsSource = nodes;
             }, null);
         }
 
@@ -314,41 +505,29 @@ namespace rediscover
             fireflies.Add(firefly);
         }
 
-        public async void postFireflyAttribute(Firefly fireflyToUpate)
+        #region NavigationHelper and more
+
+        public NavigationHelper NavigationHelper
         {
-            // PUT data
-            Uri uri = new Uri(monitorUri + "firefly/" + fireflyToUpate.Id);
-            string usrData = "attribute=" + fireflyToUpate.Attribute;
-
-            // Http PUT Request
-            HttpClient client = new HttpClient();
-            HttpStringContent content = new HttpStringContent(usrData, UnicodeEncoding.Utf8, CURL_MEDIA_TYPE);
-            HttpResponseMessage response = await client.PutAsync(uri, content);
-
-            if (response.IsSuccessStatusCode) // Success
-            {
-                Debug.WriteLine("Put Success: " + fireflyToUpate.Id);
-            } else
-            {
-                Debug.WriteLine("Put Fail: " + fireflyToUpate.Id);
-            }
+            get { return this.navigationHelper; }
         }
 
-        #region NavigationHelper registration
+        public ObservableDictionary DefaultViewModel
+        {
+            get { return this.defaultViewModel; }
+        }
 
-        /// <summary>
-        /// The methods provided in this section are simply used to allow
-        /// NavigationHelper to respond to the page's navigation methods.
-        /// <para>
-        /// Page specific logic should be placed in event handlers for the  
-        /// <see cref="NavigationHelper.LoadState"/>
-        /// and <see cref="NavigationHelper.SaveState"/>.
-        /// The navigation parameter is available in the LoadState method 
-        /// in addition to page state preserved during an earlier session.
-        /// </para>
-        /// </summary>
-        /// <param name="e">Provides data for navigation methods and event
-        /// handlers that cannot cancel the navigation request.</param>
+        private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
+        {
+            RefreshFirefliesListView();
+            RefreshNodesListView();
+        }
+
+        private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
+        {
+
+        }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             this.navigationHelper.OnNavigatedTo(e);

@@ -61,11 +61,13 @@
       <RootEvent Name="KeyUp" />
       <RootEvent Name="LostFocus" />
     </RootType>
-    <RootType FullName="rediscover.ItemPage" />
+    <RootType FullName="rediscover.ItemPageNode" />
+    <RootType FullName="rediscover.ItemPageFirefly" />
     <RootType FullName="Windows.UI.Xaml.Controls.UserControl">
       <RootProperty Name="Content" />
     </RootType>
     <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.StaticResourceExtension" />
+    <RootType FullName="rediscover.ItemViewerNode" />
     <RootType FullName="rediscover.ItemViewerFirefly" />
     <RootType FullName="Windows.UI.Xaml.DataTemplate">
       <RootProperty Name="Template" />

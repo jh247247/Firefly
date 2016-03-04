@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="rediscover.ItemPage"
+    x:Class="rediscover.ItemPageNode"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:rediscover"
@@ -35,7 +35,7 @@
 
         <!-- Title Panel -->
         <StackPanel Grid.Row="0" Margin="19,0,0,0">
-            <TextBlock Text="smartER" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,12,0,0"/>
+            <TextBlock Text="rediscover" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,12,0,0"/>
             <TextBlock x:Name="tblId" Text="" Margin="0,-6.5,0,26.5" Style="{ThemeResource HeaderTextBlockStyle}" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
         </StackPanel>
 
@@ -48,15 +48,15 @@
                 <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
 
-            <TextBlock x:Name="tblAttributeHeader" Grid.Row="0" Text="attribute" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
-            <TextBox x:ConnectionId='1' x:Name="txtAttribute" Grid.Row="0" Text="loading..." Margin="0,30,0,0"                                                              />
-            
-            <TextBlock x:Name="tblLocationHeader" Grid.Row="1" Text="location" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
-            <TextBlock x:Name="tblLocation" Grid.Row="1" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
+            <TextBlock x:Name="tblLocationHeader" Grid.Row="0" Text="location" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
+            <TextBox x:ConnectionId='1' x:Name="txtLocation" Grid.Row="0" Text="loading..." Margin="0,30,0,0"                                                            />
 
-            <TextBlock x:Name="tblLastUpdateHeader" Grid.Row="2" Text="last update" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
-            <TextBlock x:Name="tblLastUpdate" Grid.Row="2" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
-            
+            <TextBlock x:Name="tblLastUpdateHeader" Grid.Row="1" Text="last update" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
+            <TextBlock x:Name="tblLastUpdate" Grid.Row="1" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
+
+            <TextBlock x:Name="tblFirefliesListHeader" Grid.Row="2" Text="fireflies nearby" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
+            <TextBlock x:Name="tblFirefliesList" Grid.Row="2" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
+
         </Grid>
     </Grid>
 </Page>
