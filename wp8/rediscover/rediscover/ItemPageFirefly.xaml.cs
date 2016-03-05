@@ -1,11 +1,9 @@
 ﻿using rediscover.Common;
-using rediscover.Data;
 using rediscover.DataModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Input;
 using Windows.Foundation;
@@ -54,7 +52,7 @@ namespace rediscover
             get { return this.defaultViewModel; }
         }
         
-        private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
+        private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             // Parse Navigation Args
             List<object> itemPageNavList = (List<object>) e.NavigationParameter;

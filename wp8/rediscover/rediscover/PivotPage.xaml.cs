@@ -1,5 +1,4 @@
 ﻿using rediscover.Common;
-using rediscover.Data;
 using rediscover.DataModel;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-//using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,37 +64,29 @@ namespace rediscover
 
             nodes = new NodeCollection();
             lstNodes.ItemsSource = nodes;
+            
+            getMonitorIPAddress();
 
             monitorUri = "http://" + monitorIPAddress + ":" + monitorPort + "/";
-
-            //getMonitorIPAddress();
 
             getFirefliesFromMonitor();
             getNodesFromMonitor();
         }
 
         #region GET and PUT functions
-
-        // TODO: Get working with rediscover
+        
         public async void getMonitorIPAddress()
         {
-            var domains = await ZeroconfResolver.BrowseDomainsAsync();
-
-            //var responses = await ZeroconfResolver.ResolveAsync(domains.Select(g => g.Key));
-            var responses = await ZeroconfResolver.ResolveAsync("_http._tcp.local."); // This finds Brother printer
-            //var responses = await ZeroconfResolver.ResolveAsync("_rediscover._tcp.local."); // "_http._tcp"
+            var responses = await ZeroconfResolver.ResolveAsync("_rediscover._tcp.local");
 
             foreach (var response in responses)
             {
-                fireflies.Add(new Firefly("Zeroconf Responses", response.DisplayName));
-            }
-            RefreshFirefliesListView();
+                // Debug output
+                Debug.WriteLine("Info: Zeroconf Response: " + response.DisplayName + ": " + response.IPAddress);
 
-            foreach (var domain in domains.Select(g => g.Key))
-            {
-                fireflies.Add(new Firefly("Zeroconf Domains", domain.ToString()));
+                // Update IP address
+                monitorIPAddress = response.IPAddress;
             }
-            RefreshFirefliesListView();
         }
 
         public async void getFirefliesFromMonitor()
@@ -104,28 +94,36 @@ namespace rediscover
             // Http Get Request
             var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "firefly");
-            Debug.WriteLine("Http GET of fireflies from monitor: " + uri);
-            var response = await client.GetAsync(uri); // TODO: If System.Exception occurs here, bc monitor not running, check before get here
+            Debug.WriteLine("Info: Http GET of fireflies from monitor: " + uri);
+
+            try
+            {
+                var response = await client.GetAsync(uri);
             
-            if (response.IsSuccessStatusCode) // Get Success
-            {
-                // Get Json
-                string content = await response.Content.ReadAsStringAsync();
-
-                // Parse Json
-                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
-                JsonArray fireflyIds = jsonParsed.GetNamedArray("ids");
-
-                // Create fireflies from ids
-                foreach (JsonValue fireflyId in fireflyIds)
+                if (response.IsSuccessStatusCode) // Get Success
                 {
-                    getFireflyDetailsFromMonitor(fireflyId.GetString());
+                    // Get Json
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    // Parse Json
+                    JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+                    JsonArray fireflyIds = jsonParsed.GetNamedArray("ids");
+
+                    // Create fireflies from ids
+                    foreach (JsonValue fireflyId in fireflyIds)
+                    {
+                        getFireflyDetailsFromMonitor(fireflyId.GetString());
+                    }
+                    RefreshFirefliesListView();
                 }
-                RefreshFirefliesListView();
+                else
+                {
+                    Debug.WriteLine("Error: During Firefly GET. Error code: " + response.StatusCode + ": " + uri);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.WriteLine("Error: Http GET of fireflies from monitor failed: " + uri);
+                Debug.WriteLine("Error: During Firefly GET. Possibly unable to connect to monitor: " + ex.Message);
             }
         }
 
@@ -134,7 +132,7 @@ namespace rediscover
             // Http Get Request
             var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "firefly/" + fireflyId);
-            Debug.WriteLine("Http GET of firefly details from monitor: " + uri);
+            Debug.WriteLine("Info: Http GET of firefly details from monitor: " + uri);
             var response = await client.GetAsync(uri);
 
             if (response.IsSuccessStatusCode) // Get Success
@@ -144,14 +142,13 @@ namespace rediscover
 
                 // Parse Json
                 JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
-                Debug.WriteLine(jsonParsed.GetNamedString("fireflyId"));
 
                 Firefly newFirefly = new Firefly();
                 try
                 {
                     newFirefly.Id = jsonParsed.GetNamedString("fireflyId");
                 }
-                catch (Exception ex)
+                catch
                 {
                     Debug.WriteLine("Warning: No id associated with firefly");
                 }
@@ -159,9 +156,8 @@ namespace rediscover
                 {
                     newFirefly.Battery = jsonParsed.GetNamedString("bat");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No battery value associated with firefly");
                 }
                 try
                 {
@@ -169,26 +165,23 @@ namespace rediscover
                     timestamp = timestamp.AddSeconds(jsonParsed.GetNamedNumber("timestamp"));
                     newFirefly.LastUpdateTime = timestamp.ToLocalTime();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No timestamp associated with firefly");
                 }
                 try
                 {
                     newFirefly.NodeId = jsonParsed.GetNamedString("nodeId");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No nodeId associated with firefly");
                 }
                 try
                 {
                     JsonObject usrData = jsonParsed["usrData"].GetObject();
                     newFirefly.Attribute = usrData.GetNamedString("attribute");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No attribute associated with firefly");
                 }
 
                 fireflies.Add(newFirefly);
@@ -205,28 +198,35 @@ namespace rediscover
             // Http Get Request
             var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "node");
-            Debug.WriteLine("Http GET of nodes from monitor: " + uri);
-            var response = await client.GetAsync(uri);
-
-            if (response.IsSuccessStatusCode) // Get Success
+            Debug.WriteLine("Info: Http GET of nodes from monitor: " + uri);
+            try
             {
-                // Get Json
-                string content = await response.Content.ReadAsStringAsync();
+                var response = await client.GetAsync(uri);
 
-                // Parse Json
-                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
-                JsonArray nodeIds = jsonParsed.GetNamedArray("ids");
-
-                // Create fireflies from ids
-                foreach (JsonValue nodeId in nodeIds)
+                if (response.IsSuccessStatusCode) // Get Success
                 {
-                    getNodeDetailsFromMonitor(nodeId.GetString());
+                    // Get Json
+                    string content = await response.Content.ReadAsStringAsync();
+
+                    // Parse Json
+                    JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+                    JsonArray nodeIds = jsonParsed.GetNamedArray("ids");
+
+                    // Create fireflies from ids
+                    foreach (JsonValue nodeId in nodeIds)
+                    {
+                        getNodeDetailsFromMonitor(nodeId.GetString());
+                    }
+                    RefreshNodesListView();
                 }
-                RefreshNodesListView();
+                else
+                {
+                    Debug.WriteLine("Error: During Node GET. Error code: " + response.StatusCode + ": " + uri);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.WriteLine("Error: Http GET of nodes from monitor failed: " + uri);
+                Debug.WriteLine("Error: During Node GET. Possibly unable to connect to monitor: " + ex.Message);
             }
         }
 
@@ -235,7 +235,7 @@ namespace rediscover
             // Http Get Request
             var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "node/" + nodeId);
-            Debug.WriteLine("Http GET of node details from monitor: " + uri);
+            Debug.WriteLine("Info: Http GET of node details from monitor: " + uri);
             var response = await client.GetAsync(uri);
 
             if (response.IsSuccessStatusCode) // Get Success
@@ -245,14 +245,13 @@ namespace rediscover
 
                 // Parse Json
                 JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
-                Debug.WriteLine(jsonParsed.GetNamedString("nodeId"));
 
                 Node newNode = new Node();
                 try
                 {
                     newNode.Id = jsonParsed.GetNamedString("nodeId");
                 }
-                catch (Exception ex)
+                catch
                 {
                     Debug.WriteLine("Warning: No id associated with node");
                 }
@@ -262,26 +261,23 @@ namespace rediscover
                     timestamp = timestamp.AddSeconds(jsonParsed.GetNamedNumber("timestamp"));
                     newNode.LastUpdateTime = timestamp.ToLocalTime();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No timestamp associated with node");
                 }
                 try
                 {
                     newNode.FirefliesList = jsonParsed.GetNamedArray("fireflies");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No fireflies list associated with node");
                 }
                 try
                 {
                     JsonObject usrData = jsonParsed["usrData"].GetObject();
                     newNode.Location = usrData.GetNamedString("location");
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Debug.WriteLine("Warning: No location associated with node");
                 }
 
                 nodes.Add(newNode);
@@ -306,11 +302,11 @@ namespace rediscover
 
             if (response.IsSuccessStatusCode) // Success
             {
-                Debug.WriteLine("Put Success: " + fireflyToUpate.Id);
+                Debug.WriteLine("Info: Put Success: " + fireflyToUpate.Id);
             }
             else
             {
-                Debug.WriteLine("Put Fail: " + fireflyToUpate.Id);
+                Debug.WriteLine("Error: Put Fail: " + fireflyToUpate.Id);
             }
         }
 
@@ -327,11 +323,11 @@ namespace rediscover
 
             if (response.IsSuccessStatusCode) // Success
             {
-                Debug.WriteLine("Put Success: " + nodeToUpate.Id);
+                Debug.WriteLine("Info: Put Success: " + nodeToUpate.Id);
             }
             else
             {
-                Debug.WriteLine("Put Fail: " + nodeToUpate.Id);
+                Debug.WriteLine("Error: Put Fail: " + nodeToUpate.Id);
             }
         }
 
@@ -349,13 +345,15 @@ namespace rediscover
 
         private void pvtMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((Pivot)sender).SelectedIndex == 0)
+            RefreshNodesListView();
+
+            if (((Pivot)sender).SelectedIndex == 0) // Fireflies page
             {
-                // Refresh Fireflies
+                RefreshNodesListView();
             }
-            else if (((Pivot)sender).SelectedIndex == 1)
+            else if (((Pivot)sender).SelectedIndex == 1) // Nodes page
             {
-                // Refresh Nodes
+                RefreshFirefliesListView();
             }
         }
 
@@ -521,7 +519,7 @@ namespace rediscover
             get { return this.defaultViewModel; }
         }
 
-        private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
+        private void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             RefreshFirefliesListView();
             RefreshNodesListView();

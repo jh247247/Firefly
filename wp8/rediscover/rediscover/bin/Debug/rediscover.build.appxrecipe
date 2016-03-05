@@ -64,9 +64,6 @@
     <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\Common\ReadMe.txt">
       <PackagePath>Common\ReadMe.txt</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\DataModel\SampleData.json">
-      <PackagePath>DataModel\SampleData.json</PackagePath>
-    </AppxPackagedFile>
     <AppxPackagedFile Include="C:\Users\Nick\Dropbox\My Stuff\Imagine Cup\Firefly\wp8\rediscover\rediscover\bin\Debug\rediscover.xr.xml">
       <PackagePath>rediscover.xr.xml</PackagePath>
     </AppxPackagedFile>
