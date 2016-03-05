@@ -125,33 +125,33 @@ namespace rediscover.rediscover_XamlTypeInfo
         private void InitTypeTables()
         {
             _typeNameTable = new string[14];
-            _typeNameTable[0] = "rediscover.ItemPageNode";
-            _typeNameTable[1] = "Windows.UI.Xaml.Controls.Page";
-            _typeNameTable[2] = "Windows.UI.Xaml.Controls.UserControl";
-            _typeNameTable[3] = "rediscover.Common.NavigationHelper";
-            _typeNameTable[4] = "Windows.UI.Xaml.DependencyObject";
-            _typeNameTable[5] = "rediscover.Common.ObservableDictionary";
-            _typeNameTable[6] = "Object";
-            _typeNameTable[7] = "String";
-            _typeNameTable[8] = "rediscover.ItemPageFirefly";
-            _typeNameTable[9] = "rediscover.ItemViewerNode";
-            _typeNameTable[10] = "rediscover.ItemViewerFirefly";
+            _typeNameTable[0] = "rediscover.ItemViewerFirefly";
+            _typeNameTable[1] = "Windows.UI.Xaml.Controls.UserControl";
+            _typeNameTable[2] = "rediscover.ItemPageNode";
+            _typeNameTable[3] = "Windows.UI.Xaml.Controls.Page";
+            _typeNameTable[4] = "rediscover.Common.NavigationHelper";
+            _typeNameTable[5] = "Windows.UI.Xaml.DependencyObject";
+            _typeNameTable[6] = "rediscover.Common.ObservableDictionary";
+            _typeNameTable[7] = "Object";
+            _typeNameTable[8] = "String";
+            _typeNameTable[9] = "rediscover.ItemPageFirefly";
+            _typeNameTable[10] = "rediscover.ItemViewerNode";
             _typeNameTable[11] = "rediscover.PivotPage";
             _typeNameTable[12] = "rediscover.DataModel.FireflyCollection";
             _typeNameTable[13] = "rediscover.DataModel.NodeCollection";
 
             _typeTable = new global::System.Type[14];
-            _typeTable[0] = typeof(global::rediscover.ItemPageNode);
-            _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.Page);
-            _typeTable[2] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
-            _typeTable[3] = typeof(global::rediscover.Common.NavigationHelper);
-            _typeTable[4] = typeof(global::Windows.UI.Xaml.DependencyObject);
-            _typeTable[5] = typeof(global::rediscover.Common.ObservableDictionary);
-            _typeTable[6] = typeof(global::System.Object);
-            _typeTable[7] = typeof(global::System.String);
-            _typeTable[8] = typeof(global::rediscover.ItemPageFirefly);
-            _typeTable[9] = typeof(global::rediscover.ItemViewerNode);
-            _typeTable[10] = typeof(global::rediscover.ItemViewerFirefly);
+            _typeTable[0] = typeof(global::rediscover.ItemViewerFirefly);
+            _typeTable[1] = typeof(global::Windows.UI.Xaml.Controls.UserControl);
+            _typeTable[2] = typeof(global::rediscover.ItemPageNode);
+            _typeTable[3] = typeof(global::Windows.UI.Xaml.Controls.Page);
+            _typeTable[4] = typeof(global::rediscover.Common.NavigationHelper);
+            _typeTable[5] = typeof(global::Windows.UI.Xaml.DependencyObject);
+            _typeTable[6] = typeof(global::rediscover.Common.ObservableDictionary);
+            _typeTable[7] = typeof(global::System.Object);
+            _typeTable[8] = typeof(global::System.String);
+            _typeTable[9] = typeof(global::rediscover.ItemPageFirefly);
+            _typeTable[10] = typeof(global::rediscover.ItemViewerNode);
             _typeTable[11] = typeof(global::rediscover.PivotPage);
             _typeTable[12] = typeof(global::rediscover.DataModel.FireflyCollection);
             _typeTable[13] = typeof(global::rediscover.DataModel.NodeCollection);
@@ -189,15 +189,15 @@ namespace rediscover.rediscover_XamlTypeInfo
             return -1;
         }
 
-        private object Activate_0_ItemPageNode() { return new global::rediscover.ItemPageNode(); }
-        private object Activate_5_ObservableDictionary() { return new global::rediscover.Common.ObservableDictionary(); }
-        private object Activate_8_ItemPageFirefly() { return new global::rediscover.ItemPageFirefly(); }
-        private object Activate_9_ItemViewerNode() { return new global::rediscover.ItemViewerNode(); }
-        private object Activate_10_ItemViewerFirefly() { return new global::rediscover.ItemViewerFirefly(); }
+        private object Activate_0_ItemViewerFirefly() { return new global::rediscover.ItemViewerFirefly(); }
+        private object Activate_2_ItemPageNode() { return new global::rediscover.ItemPageNode(); }
+        private object Activate_6_ObservableDictionary() { return new global::rediscover.Common.ObservableDictionary(); }
+        private object Activate_9_ItemPageFirefly() { return new global::rediscover.ItemPageFirefly(); }
+        private object Activate_10_ItemViewerNode() { return new global::rediscover.ItemViewerNode(); }
         private object Activate_11_PivotPage() { return new global::rediscover.PivotPage(); }
         private object Activate_12_FireflyCollection() { return new global::rediscover.DataModel.FireflyCollection(); }
         private object Activate_13_NodeCollection() { return new global::rediscover.DataModel.NodeCollection(); }
-        private void MapAdd_5_ObservableDictionary(object instance, object key, object item)
+        private void MapAdd_6_ObservableDictionary(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.String, global::System.Object>)instance;
             var newKey = (global::System.String)key;
@@ -215,69 +215,69 @@ namespace rediscover.rediscover_XamlTypeInfo
             switch (typeIndex)
             {
 
-            case 0:   //  rediscover.ItemPageNode
+            case 0:   //  rediscover.ItemViewerFirefly
+                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
+                userType.Activator = Activate_0_ItemViewerFirefly;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 1:   //  Windows.UI.Xaml.Controls.UserControl
+                xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
+                break;
+
+            case 2:   //  rediscover.ItemPageNode
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_0_ItemPageNode;
+                userType.Activator = Activate_2_ItemPageNode;
                 userType.AddMemberName("NavigationHelper");
                 userType.AddMemberName("DefaultViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 1:   //  Windows.UI.Xaml.Controls.Page
+            case 3:   //  Windows.UI.Xaml.Controls.Page
                 xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 2:   //  Windows.UI.Xaml.Controls.UserControl
-                xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
-                break;
-
-            case 3:   //  rediscover.Common.NavigationHelper
+            case 4:   //  rediscover.Common.NavigationHelper
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.DependencyObject"));
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 4:   //  Windows.UI.Xaml.DependencyObject
+            case 5:   //  Windows.UI.Xaml.DependencyObject
                 xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 5:   //  rediscover.Common.ObservableDictionary
+            case 6:   //  rediscover.Common.ObservableDictionary
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Object"));
-                userType.DictionaryAdd = MapAdd_5_ObservableDictionary;
+                userType.DictionaryAdd = MapAdd_6_ObservableDictionary;
                 userType.SetIsReturnTypeStub();
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 6:   //  Object
+            case 7:   //  Object
                 xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 7:   //  String
+            case 8:   //  String
                 xamlType = new global::rediscover.rediscover_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 8:   //  rediscover.ItemPageFirefly
+            case 9:   //  rediscover.ItemPageFirefly
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
-                userType.Activator = Activate_8_ItemPageFirefly;
+                userType.Activator = Activate_9_ItemPageFirefly;
                 userType.AddMemberName("NavigationHelper");
                 userType.AddMemberName("DefaultViewModel");
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 9:   //  rediscover.ItemViewerNode
+            case 10:   //  rediscover.ItemViewerNode
                 userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_9_ItemViewerNode;
-                userType.SetIsLocalType();
-                xamlType = userType;
-                break;
-
-            case 10:   //  rediscover.ItemViewerFirefly
-                userType = new global::rediscover.rediscover_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.UserControl"));
-                userType.Activator = Activate_10_ItemViewerFirefly;
+                userType.Activator = Activate_10_ItemViewerNode;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -742,8 +742,6 @@ namespace rediscover.rediscover_XamlTypeInfo
         }
     }
 }
-
-
 
 
 

@@ -3,12 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:rediscover"
-    xmlns:data="using:rediscover.Data"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     DataContext="{Binding DefaultViewModel.Item, RelativeSource={RelativeSource Self}}"
-    d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Transitions>
         <TransitionCollection>
@@ -44,19 +42,18 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="1*" />
+                <RowDefinition Height="3*" />
             </Grid.RowDefinitions>
 
             <TextBlock x:Name="tblAttributeHeader" Grid.Row="0" Text="attribute" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
             <TextBox x:ConnectionId='1' x:Name="txtAttribute" Grid.Row="0" Text="loading..." Margin="0,30,0,0"                                                              />
-            
-            <TextBlock x:Name="tblLocationHeader" Grid.Row="1" Text="location" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
-            <TextBlock x:Name="tblLocation" Grid.Row="1" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
 
-            <TextBlock x:Name="tblLastUpdateHeader" Grid.Row="2" Text="last update" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
-            <TextBlock x:Name="tblLastUpdate" Grid.Row="2" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
-            
+            <TextBlock x:Name="tblLastUpdateHeader" Grid.Row="1" Text="last update" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
+            <TextBlock x:Name="tblLastUpdate" Grid.Row="1" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
+
+            <TextBlock x:Name="tblLocationHeader" Grid.Row="2" Text="location" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}"/>
+            <TextBlock x:Name="tblLocation" Grid.Row="2" Text="loading..." Style="{ThemeResource ListViewItemTextBlockStyle}" Margin="0,20,0,0"/>
+
         </Grid>
     </Grid>
 </Page>

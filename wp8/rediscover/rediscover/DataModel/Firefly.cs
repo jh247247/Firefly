@@ -170,5 +170,17 @@ namespace rediscover.DataModel
             }
             return false;
         }
+
+        public Firefly GetById(string fireflyId)
+        {
+            foreach (Firefly fireflyTocheck in fireflyCollection)
+            {
+                if (fireflyTocheck.Id == fireflyId)
+                {
+                    return fireflyTocheck;
+                }
+            }
+            return null;
+        }
     }
 }

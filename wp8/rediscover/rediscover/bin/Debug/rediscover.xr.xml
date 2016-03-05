@@ -10,9 +10,9 @@
     <RootType FullName="Windows.UI.Xaml.Controls.Page">
       <RootProperty Name="DataContext" />
       <RootProperty Name="Background" />
+      <RootProperty Name="Resources" />
       <RootProperty Name="Transitions" />
       <RootProperty Name="Content" />
-      <RootProperty Name="Resources" />
       <RootProperty Name="BottomAppBar" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.Binding">
@@ -20,6 +20,10 @@
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.RelativeSource" />
     <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.ThemeResourceExtension" />
+    <RootType FullName="Windows.UI.Xaml.DataTemplate">
+      <RootProperty Name="Template" />
+    </RootType>
+    <RootType FullName="rediscover.ItemViewerFirefly" />
     <RootType FullName="Windows.UI.Xaml.Media.Animation.TransitionCollection" />
     <RootType FullName="Windows.UI.Xaml.Media.Animation.NavigationThemeTransition">
       <RootProperty Name="DefaultNavigationTransitionInfo" />
@@ -61,17 +65,21 @@
       <RootEvent Name="KeyUp" />
       <RootEvent Name="LostFocus" />
     </RootType>
+    <RootType FullName="Windows.UI.Xaml.Controls.ListView">
+      <RootProperty Name="ItemTemplate" />
+      <RootProperty Name="SelectionMode" />
+      <RootProperty Name="IsItemClickEnabled" />
+      <RootProperty Name="Margin" />
+      <RootEvent Name="ItemClick" />
+      <RootEvent Name="ContainerContentChanging" />
+    </RootType>
+    <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.StaticResourceExtension" />
     <RootType FullName="rediscover.ItemPageNode" />
     <RootType FullName="rediscover.ItemPageFirefly" />
     <RootType FullName="Windows.UI.Xaml.Controls.UserControl">
       <RootProperty Name="Content" />
     </RootType>
-    <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.StaticResourceExtension" />
     <RootType FullName="rediscover.ItemViewerNode" />
-    <RootType FullName="rediscover.ItemViewerFirefly" />
-    <RootType FullName="Windows.UI.Xaml.DataTemplate">
-      <RootProperty Name="Template" />
-    </RootType>
     <RootType FullName="Windows.UI.Xaml.Media.Animation.CommonNavigationTransitionInfo">
       <RootProperty Name="IsStaggeringEnabled" />
       <RootMethod Name="GetIsStaggerElement" />
@@ -94,14 +102,6 @@
       <RootProperty Name="Header" />
       <RootProperty Name="DataContext" />
       <RootProperty Name="Content" />
-    </RootType>
-    <RootType FullName="Windows.UI.Xaml.Controls.ListView">
-      <RootProperty Name="ItemTemplate" />
-      <RootProperty Name="SelectionMode" />
-      <RootProperty Name="IsItemClickEnabled" />
-      <RootProperty Name="Margin" />
-      <RootEvent Name="ItemClick" />
-      <RootEvent Name="ContainerContentChanging" />
     </RootType>
     <RootType FullName="rediscover.PivotPage" />
   </Roots.RootTypes>

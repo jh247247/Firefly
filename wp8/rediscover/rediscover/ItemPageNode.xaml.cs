@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Windows.Input;
 using Windows.Data.Json;
 using Windows.Foundation;
@@ -30,9 +31,11 @@ namespace rediscover
     {
         private readonly NavigationHelper navigationHelper;
         private readonly ObservableDictionary defaultViewModel = new ObservableDictionary();
+        SynchronizationContext _syncContext;
 
         private Node nodeClicked;
         private PivotPage pivotPageRef;
+        private FireflyCollection nodeFireflies;
 
         public ItemPageNode()
         {
@@ -88,17 +91,18 @@ namespace rediscover
 
             if (nodeClicked.FirefliesList.Count != 0)
             {
-                tblFirefliesList.Text = "";
+                nodeFireflies = new FireflyCollection();
+
                 foreach (JsonValue firefly in nodeClicked.FirefliesList)
                 {
-                    tblFirefliesList.Text += firefly.GetString() + "\n";
+                    nodeFireflies.Add(pivotPageRef.fireflies.GetById(firefly.GetString()));
                 }
-                tblFirefliesList.FontStyle = Windows.UI.Text.FontStyle.Normal;
+
+                lstFireflies.ItemsSource = nodeFireflies;
             }
             else
             {
-                tblFirefliesList.Text = "None";
-                tblFirefliesList.FontStyle = Windows.UI.Text.FontStyle.Italic;
+                lstFireflies.Visibility = Visibility.Collapsed;
             }
         }
         
@@ -108,20 +112,7 @@ namespace rediscover
         }
 
         #region NavigationHelper registration
-
-        /// <summary>
-        /// The methods provided in this section are simply used to allow
-        /// NavigationHelper to respond to the page's navigation methods.
-        /// <para>
-        /// Page specific logic should be placed in event handlers for the  
-        /// <see cref="NavigationHelper.LoadState"/>
-        /// and <see cref="NavigationHelper.SaveState"/>.
-        /// The navigation parameter is available in the LoadState method 
-        /// in addition to page state preserved during an earlier session.
-        /// </para>
-        /// </summary>
-        /// <param name="e">Provides data for navigation methods and event
-        /// handlers that cannot cancel the navigation request.</param>
+        
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             this.navigationHelper.OnNavigatedTo(e);
@@ -164,5 +155,77 @@ namespace rediscover
             control.IsEnabled = true;
             control.IsTabStop = isTabStop;
         }
+
+        #region Firefly ListView
+
+        private void lstFireflies_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // Get firefly
+            var fireflyClicked = ((Firefly)e.ClickedItem);
+            // Get actual firefly not just id
+            //var fireflyClickedActual = pivotPageRef.fireflies.GetById(fireflyClicked.Id);
+
+            // Setup Navigation args
+            List<object> itemPageNavList = new List<object>();
+            itemPageNavList.Add(pivotPageRef);
+            itemPageNavList.Add(fireflyClicked);
+
+            // Navigate
+            if (!Frame.Navigate(typeof(ItemPageFirefly), itemPageNavList))
+            {
+                throw new Exception("Navigation Failed Exception");
+            }
+        }
+
+        // Load listview contents in stages for user-responsiveness
+        private void lstFireflies_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            ItemViewerFirefly iv = args.ItemContainer.ContentTemplateRoot as ItemViewerFirefly;
+
+            if (args.InRecycleQueue == true)
+            {
+                iv.ClearData();
+            }
+            else if (args.Phase == 0)
+            {
+                iv.ShowPlaceholder(args.Item as Firefly);
+                args.RegisterUpdateCallback(ContainerContentChangingDelegateFireflies);
+            }
+            else if (args.Phase == 1)
+            {
+                iv.ShowId();
+                args.RegisterUpdateCallback(ContainerContentChangingDelegateFireflies);
+            }
+            else if (args.Phase == 2)
+            {
+                iv.ShowAttribute();
+            }
+
+            args.Handled = true;
+        }
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> ContainerContentChangingDelegateFireflies
+        {
+            get
+            {
+                if (_delegateFireflies == null)
+                {
+                    _delegateFireflies = new TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs>(lstFireflies_ContainerContentChanging);
+                }
+                return _delegateFireflies;
+            }
+        }
+        private TypedEventHandler<ListViewBase, ContainerContentChangingEventArgs> _delegateFireflies;
+
+        private void RefreshFirefliesListView()
+        {
+            _syncContext.Post((s) =>
+            {
+                // TODO: Find better way of refreshing listview
+                lstFireflies.ItemsSource = null;
+                lstFireflies.ItemsSource = nodeFireflies;
+            }, null);
+        }
+
+        #endregion
     }
 }

@@ -164,5 +164,17 @@ namespace rediscover.DataModel
             }
             return "";
         }
+
+        public Node GetById(string nodeId)
+        {
+            foreach (Node nodeTocheck in nodeCollection)
+            {
+                if (nodeTocheck.Id == nodeId)
+                {
+                    return nodeTocheck;
+                }
+            }
+            return null;
+        }
     }
 }
