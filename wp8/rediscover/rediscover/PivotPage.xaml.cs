@@ -46,6 +46,8 @@ namespace rediscover
 
         public static string CURL_MEDIA_TYPE = "application/x-www-form-urlencoded"; // Only one that works!!!
 
+        private HttpClient client;
+
         public PivotPage()
         {
             this.InitializeComponent();
@@ -58,6 +60,12 @@ namespace rediscover
 
             _syncContext = SynchronizationContext.Current;
 
+            var httpFilter = new Windows.Web.Http.Filters.HttpBaseProtocolFilter();
+            httpFilter.CacheControl.ReadBehavior =
+                Windows.Web.Http.Filters.HttpCacheReadBehavior.MostRecent;
+
+            client = new HttpClient(httpFilter);
+
             fireflies = new FireflyCollection();
             //addSampleFireflies();
             lstFireflies.ItemsSource = fireflies;
@@ -69,8 +77,8 @@ namespace rediscover
 
             monitorUri = "http://" + monitorIPAddress + ":" + monitorPort + "/";
 
-            getFirefliesFromMonitor();
-            getNodesFromMonitor();
+            //getFirefliesFromMonitor();
+            //getNodesFromMonitor();
         }
 
         #region GET and PUT functions
@@ -91,8 +99,9 @@ namespace rediscover
 
         public async void getFirefliesFromMonitor()
         {
+            fireflies.Clear();
+
             // Http Get Request
-            var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "firefly");
             Debug.WriteLine("Info: Http GET of fireflies from monitor: " + uri);
 
@@ -130,7 +139,6 @@ namespace rediscover
         public async void getFireflyDetailsFromMonitor(string fireflyId)
         {
             // Http Get Request
-            var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "firefly/" + fireflyId);
             Debug.WriteLine("Info: Http GET of firefly details from monitor: " + uri);
             var response = await client.GetAsync(uri);
@@ -195,8 +203,9 @@ namespace rediscover
 
         public async void getNodesFromMonitor()
         {
+            nodes.Clear();
+
             // Http Get Request
-            var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "node");
             Debug.WriteLine("Info: Http GET of nodes from monitor: " + uri);
             try
@@ -233,7 +242,6 @@ namespace rediscover
         public async void getNodeDetailsFromMonitor(string nodeId)
         {
             // Http Get Request
-            var client = new HttpClient();
             Uri uri = new Uri(monitorUri + "node/" + nodeId);
             Debug.WriteLine("Info: Http GET of node details from monitor: " + uri);
             var response = await client.GetAsync(uri);
@@ -242,6 +250,7 @@ namespace rediscover
             {
                 // Get Json
                 string content = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine("JSON: " + content);
 
                 // Parse Json
                 JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
@@ -296,7 +305,6 @@ namespace rediscover
             string usrData = "attribute=" + fireflyToUpate.Attribute;
 
             // Http PUT Request
-            HttpClient client = new HttpClient();
             HttpStringContent content = new HttpStringContent(usrData, UnicodeEncoding.Utf8, CURL_MEDIA_TYPE);
             HttpResponseMessage response = await client.PutAsync(uri, content);
 
@@ -317,7 +325,6 @@ namespace rediscover
             string usrData = "location=" + nodeToUpate.Location;
 
             // Http PUT Request
-            HttpClient client = new HttpClient();
             HttpStringContent content = new HttpStringContent(usrData, UnicodeEncoding.Utf8, CURL_MEDIA_TYPE);
             HttpResponseMessage response = await client.PutAsync(uri, content);
 
@@ -345,15 +352,19 @@ namespace rediscover
 
         private void pvtMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            RefreshNodesListView();
-
             if (((Pivot)sender).SelectedIndex == 0) // Fireflies page
             {
+                getFirefliesFromMonitor();
+                getNodesFromMonitor();
+                RefreshFirefliesListView();
                 RefreshNodesListView();
             }
             else if (((Pivot)sender).SelectedIndex == 1) // Nodes page
             {
+                getFirefliesFromMonitor();
+                getNodesFromMonitor();
                 RefreshFirefliesListView();
+                RefreshNodesListView();
             }
         }
 
