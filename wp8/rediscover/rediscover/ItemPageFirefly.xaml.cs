@@ -2,10 +2,13 @@
 using rediscover.DataModel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -17,6 +20,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Web.Http;
 
 // The Pivot Application template is documented at http://go.microsoft.com/fwlink/?LinkID=391641
 
@@ -33,6 +37,9 @@ namespace rediscover
         private Firefly fireflyClicked;
         private PivotPage pivotPageRef;
 
+        private DispatcherTimer dispatcherTimer;
+        private HttpClient client;
+
         public ItemPageFirefly()
         {
             this.InitializeComponent();
@@ -40,6 +47,17 @@ namespace rediscover
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+
+            var httpFilter = new Windows.Web.Http.Filters.HttpBaseProtocolFilter();
+            httpFilter.CacheControl.ReadBehavior =
+                Windows.Web.Http.Filters.HttpCacheReadBehavior.MostRecent;
+
+            client = new HttpClient(httpFilter);
+
+            dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += dispatcherTimer_Tick;
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 5);
+            dispatcherTimer.Start();
         } 
         
         public NavigationHelper NavigationHelper
@@ -85,25 +103,7 @@ namespace rediscover
                 tblLastUpdate.FontStyle = Windows.UI.Text.FontStyle.Italic;
             }
 
-            if (fireflyClicked.NodeId != "")
-            {
-                string location = pivotPageRef.nodes.GetLocationOfNode(fireflyClicked.NodeId);
-                if (location != "")
-                {
-                    tblLocation.Text = location;
-                    tblLocation.FontStyle = Windows.UI.Text.FontStyle.Normal;
-                }
-                else
-                {
-                    tblLocation.Text = "At Node " + fireflyClicked.NodeId;
-                    tblLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
-                }
-            }
-            else
-            {
-                tblLocation.Text = "Unknown";
-                tblLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
-            }
+            setLocationText();
         }
         
         private void NavigationHelper_SaveState(object sender, SaveStateEventArgs e)
@@ -154,6 +154,70 @@ namespace rediscover
             control.IsEnabled = false;
             control.IsEnabled = true;
             control.IsTabStop = isTabStop;
+        }
+
+        private void dispatcherTimer_Tick(object sender, object e)
+        {
+            getFireflyLocationFromMonitor();
+        }
+
+        public async void getFireflyLocationFromMonitor()
+        {
+            // Http Get Request
+            Uri uri = new Uri(pivotPageRef.monitorUri + "firefly/" + fireflyClicked.Id);
+            Debug.WriteLine("Info: Http GET of firefly location from monitor: " + uri);
+            var response = await client.GetAsync(uri);
+
+            if (response.IsSuccessStatusCode) // Get Success
+            {
+                // Get Json
+                string content = await response.Content.ReadAsStringAsync();
+
+                // Parse Json
+                JsonObject jsonParsed = await Task.Run(() => JsonObject.Parse(content));
+
+                string nodeIdFromGet = "";
+                try
+                {
+                    nodeIdFromGet = jsonParsed.GetNamedString("nodeId");
+                }
+                catch
+                {
+                }
+
+                if (nodeIdFromGet != fireflyClicked.NodeId)
+                {
+                    fireflyClicked.NodeId = nodeIdFromGet;
+                    setLocationText();
+                }
+            }
+            else
+            {
+                Debug.WriteLine("Error: Http GET of firefly location from monitor failed: " + uri);
+            }
+        }
+
+        private void setLocationText()
+        {
+            if (fireflyClicked.NodeId != "")
+            {
+                string location = pivotPageRef.nodes.GetLocationOfNode(fireflyClicked.NodeId);
+                if (location != "")
+                {
+                    tblLocation.Text = location;
+                    tblLocation.FontStyle = Windows.UI.Text.FontStyle.Normal;
+                }
+                else
+                {
+                    tblLocation.Text = "At Node " + fireflyClicked.NodeId;
+                    tblLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
+                }
+            }
+            else
+            {
+                tblLocation.Text = "Unknown";
+                tblLocation.FontStyle = Windows.UI.Text.FontStyle.Italic;
+            }
         }
     }
 }
